@@ -4,8 +4,8 @@
     "total": 67,
     "own": 41,
     "collab": 26,
-    "active_5plus": 20,
-    "active_10plus": 13
+    "active_5plus": 37,
+    "active_10plus": 26
   },
   "repos": {
     "Th3X-Zohir/Portfolio": {
@@ -34,7 +34,7 @@
       "created": "2025-11-20T06:25:28Z",
       "pushed": "2026-03-27T19:21:57Z",
       "role": "collaborator",
-      "commit_count": 2525
+      "commit_count": 2825
     },
     "the-shoaib2/sobujbd": {
       "owner": "the-shoaib2",
@@ -62,7 +62,7 @@
       "created": "2026-03-23T16:58:23Z",
       "pushed": "2026-03-25T13:14:34Z",
       "role": "owner",
-      "commit_count": 8
+      "commit_count": 56
     },
     "Th3X-Zohir/neural-ops-ai-gateway": {
       "owner": "Th3X-Zohir",
@@ -76,7 +76,7 @@
       "created": "2026-03-20T22:23:21Z",
       "pushed": "2026-03-21T18:31:29Z",
       "role": "owner",
-      "commit_count": 6
+      "commit_count": 13
     },
     "Th3X-Zohir/ecomai": {
       "owner": "Th3X-Zohir",
@@ -90,7 +90,7 @@
       "created": "2026-02-27T06:29:22Z",
       "pushed": "2026-03-19T23:29:39Z",
       "role": "owner",
-      "commit_count": 10
+      "commit_count": 96
     },
     "Th3X-Zohir/LaravelRBAC": {
       "owner": "Th3X-Zohir",
@@ -104,7 +104,7 @@
       "created": "2026-03-10T16:23:55Z",
       "pushed": "2026-03-18T20:30:49Z",
       "role": "owner",
-      "commit_count": 3
+      "commit_count": 54
     },
     "shaikhajwad/SafeCart": {
       "owner": "shaikhajwad",
@@ -132,7 +132,7 @@
       "created": "2026-01-11T17:56:15Z",
       "pushed": "2026-03-16T09:09:28Z",
       "role": "collaborator",
-      "commit_count": 1087
+      "commit_count": 1187
     },
     "Th3X-Zohir/LARAVELRBACRAISUL": {
       "owner": "Th3X-Zohir",
@@ -146,7 +146,7 @@
       "created": "2026-03-11T16:43:31Z",
       "pushed": "2026-03-12T18:05:49Z",
       "role": "owner",
-      "commit_count": 2
+      "commit_count": 11
     },
     "MZSneha/my-planner": {
       "owner": "MZSneha",
@@ -174,7 +174,7 @@
       "created": "2026-03-03T05:57:02Z",
       "pushed": "2026-03-03T10:31:30Z",
       "role": "owner",
-      "commit_count": 2
+      "commit_count": 3
     },
     "zaforIq/cse-tech-recruitemnt-server": {
       "owner": "zaforIq",
@@ -230,7 +230,7 @@
       "created": "2026-01-19T08:40:20Z",
       "pushed": "2026-02-02T08:58:59Z",
       "role": "owner",
-      "commit_count": 0
+      "commit_count": 3
     },
     "Th3X-Zohir/linkedinscrapper": {
       "owner": "Th3X-Zohir",
@@ -244,7 +244,7 @@
       "created": "2026-01-24T11:25:17Z",
       "pushed": "2026-01-27T09:34:57Z",
       "role": "owner",
-      "commit_count": 2
+      "commit_count": 9
     },
     "Th3X-Zohir/FalconAI": {
       "owner": "Th3X-Zohir",
@@ -258,7 +258,7 @@
       "created": "2026-01-27T08:34:26Z",
       "pushed": "2026-01-27T08:40:44Z",
       "role": "owner",
-      "commit_count": 5
+      "commit_count": 1
     },
     "Shafin5556/twitter_scraper_standalone": {
       "owner": "Shafin5556",
@@ -314,7 +314,7 @@
       "created": "2026-01-25T14:19:26Z",
       "pushed": "2026-01-25T17:27:56Z",
       "role": "owner",
-      "commit_count": 2
+      "commit_count": 7
     },
     "Th3X-Zohir/xscrapper": {
       "owner": "Th3X-Zohir",
@@ -328,7 +328,7 @@
       "created": "2026-01-18T09:46:47Z",
       "pushed": "2026-01-18T11:06:38Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 2
     },
     "Th3X-Zohir/JulesTest": {
       "owner": "Th3X-Zohir",
@@ -342,7 +342,7 @@
       "created": "2026-01-06T03:42:21Z",
       "pushed": "2026-01-06T10:59:02Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 5
     },
     "i-mTanvir/IMS-React-App": {
       "owner": "i-mTanvir",
@@ -398,7 +398,7 @@
       "created": "2025-06-16T01:29:45Z",
       "pushed": "2025-12-07T19:37:47Z",
       "role": "collaborator",
-      "commit_count": 606
+      "commit_count": 706
     },
     "Th3X-Zohir/RoutineScrapperX": {
       "owner": "Th3X-Zohir",
@@ -412,7 +412,7 @@
       "created": "2025-11-29T18:18:37Z",
       "pushed": "2025-11-30T19:11:18Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 22
     },
     "Th3X-Zohir/Routine-Scrapper-V5-Web": {
       "owner": "Th3X-Zohir",
@@ -426,7 +426,7 @@
       "created": "2025-10-31T21:36:57Z",
       "pushed": "2025-11-18T19:23:39Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 34
     },
     "MZSneha/ExamOra": {
       "owner": "MZSneha",
@@ -468,7 +468,7 @@
       "created": "2025-07-10T20:57:33Z",
       "pushed": "2025-10-29T09:40:09Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 101
     },
     "MZSneha/kitchenbee": {
       "owner": "MZSneha",
@@ -496,7 +496,7 @@
       "created": "2025-09-12T22:43:37Z",
       "pushed": "2025-09-12T22:43:46Z",
       "role": "owner",
-      "commit_count": 2
+      "commit_count": 1
     },
     "Th3X-Zohir/Routine-Scrapper-RS": {
       "owner": "Th3X-Zohir",
@@ -510,7 +510,7 @@
       "created": "2025-04-23T14:42:52Z",
       "pushed": "2025-09-12T22:37:54Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 25
     },
     "Th3X-Zohir/DubaiCleanupCare": {
       "owner": "Th3X-Zohir",
@@ -524,7 +524,7 @@
       "created": "2025-06-20T08:03:28Z",
       "pushed": "2025-08-30T19:59:03Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 59
     },
     "Shafin5556/e_court": {
       "owner": "Shafin5556",
@@ -552,7 +552,7 @@
       "created": "2024-11-17T07:09:04Z",
       "pushed": "2025-06-27T17:18:38Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 62
     },
     "Th3X-Zohir/SplitEasy": {
       "owner": "Th3X-Zohir",
@@ -566,7 +566,7 @@
       "created": "2025-06-24T17:26:47Z",
       "pushed": "2025-06-26T16:52:49Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 12
     },
     "Th3X-Zohir/DIU-Campus-Schedule": {
       "owner": "Th3X-Zohir",
@@ -608,7 +608,7 @@
       "created": "2024-12-23T04:30:01Z",
       "pushed": "2025-01-22T05:10:27Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 13
     },
     "Manikjoy123/portfolio": {
       "owner": "Manikjoy123",
@@ -706,7 +706,7 @@
       "created": "2024-04-15T19:13:02Z",
       "pushed": "2024-05-20T03:24:52Z",
       "role": "owner",
-      "commit_count": 25
+      "commit_count": 1874
     },
     "Th3X-Zohir/RSPanel": {
       "owner": "Th3X-Zohir",
@@ -720,7 +720,7 @@
       "created": "2024-05-06T15:20:36Z",
       "pushed": "2024-05-18T16:58:43Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 5
     },
     "Th3X-Zohir/CogniQueryEngine-": {
       "owner": "Th3X-Zohir",
@@ -734,7 +734,7 @@
       "created": "2024-05-06T21:51:14Z",
       "pushed": "2024-05-06T21:59:07Z",
       "role": "owner",
-      "commit_count": 0
+      "commit_count": 1
     },
     "Ashiqzam/psycho": {
       "owner": "Ashiqzam",
@@ -762,7 +762,7 @@
       "created": "2023-12-11T16:40:47Z",
       "pushed": "2023-12-20T18:09:04Z",
       "role": "owner",
-      "commit_count": 4
+      "commit_count": 5
     },
     "Th3X-Zohir/Function_Calling_Openai": {
       "owner": "Th3X-Zohir",
@@ -776,7 +776,7 @@
       "created": "2023-12-10T10:43:10Z",
       "pushed": "2023-12-10T10:44:29Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 2
     },
     "Th3X-Zohir/DIU-Routine-Scrapper": {
       "owner": "Th3X-Zohir",
@@ -790,7 +790,7 @@
       "created": "2023-07-22T15:20:18Z",
       "pushed": "2023-08-03T03:52:46Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 4
     },
     "Th3X-Zohir/alltagshtml": {
       "owner": "Th3X-Zohir",
@@ -804,7 +804,7 @@
       "created": "2023-02-19T03:25:18Z",
       "pushed": "2023-02-19T03:26:35Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 2
     },
     "Th3X-Zohir/Zerox": {
       "owner": "Th3X-Zohir",
@@ -818,7 +818,7 @@
       "created": "2023-01-06T17:50:04Z",
       "pushed": "2023-02-16T20:15:23Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 34
     },
     "Th3X-Zohir/DIU_Notice_Scrapper": {
       "owner": "Th3X-Zohir",
@@ -846,7 +846,7 @@
       "created": "2023-01-21T11:41:39Z",
       "pushed": "2023-01-21T12:08:47Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 5
     },
     "Th3X-Zohir/noticescrapperdiu": {
       "owner": "Th3X-Zohir",
@@ -860,7 +860,7 @@
       "created": "2023-01-19T17:04:35Z",
       "pushed": "2023-01-19T17:16:17Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 8
     },
     "sh-shafi/next_portfolio_page": {
       "owner": "sh-shafi",
@@ -902,7 +902,7 @@
       "created": "2022-09-27T09:49:08Z",
       "pushed": "2022-09-27T09:49:08Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 3
     },
     "Th3X-Zohir/Ebook": {
       "owner": "Th3X-Zohir",
@@ -916,7 +916,7 @@
       "created": "2022-09-06T19:06:02Z",
       "pushed": "2022-09-06T19:37:43Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 3
     },
     "Th3X-Zohir/Th3X-Zohir.github.io": {
       "owner": "Th3X-Zohir",
@@ -930,7 +930,7 @@
       "created": "2020-04-24T18:24:40Z",
       "pushed": "2020-04-24T19:28:40Z",
       "role": "owner",
-      "commit_count": 1
+      "commit_count": 3
     },
     "Th3X-Zohir/Zohir-Rayhan": {
       "owner": "Th3X-Zohir",
