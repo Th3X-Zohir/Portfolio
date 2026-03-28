@@ -176,89 +176,154 @@ function Marquee() {
 // ============================================================
 // PROJECT VISUAL — CSS-generated background with icon
 // ============================================================
-function BentoVisual({ id, accent }: { id: string; accent: string }) {
+// ============================================================
+// PROJECTS CAROUSEL — full-width focus slider (inspired by 3D portfolio)
+// ============================================================
+function ProjectsCarousel() {
+  const projects = [
+    { id: "efamily", badge: "Government", status: "Live System",
+      title: "E-Family Court", subtitle: "National e-Judiciary Platform — Bangladesh",
+      desc: "Full-stack developer on Bangladesh's end-to-end digital case filing system for Family Courts. Citizens file cases, track progress, and make payments online. Judges manage hearings; lawyers submit documents. Deployed across Dhaka and Chattogram.",
+      tech: ["Laravel", "PHP", "MSSQL", "JWT", "dompdf"], url: "https://efamilycourt.judiciary.gov.bd/",
+      accent: "#3B82F6" },
+    { id: "rschat", badge: "Real-Time", status: "1,874 commits",
+      title: "RSChat", subtitle: "Production WebSocket Infrastructure",
+      desc: "Production-grade real-time chat handling thousands of concurrent connections. WebSocket rooms, admin dashboards, user panels, and full TypeScript throughout.",
+      tech: ["TypeScript", "Socket.io", "Node.js", "WebSockets"], url: "https://github.com/Th3X-Zohir/RSChat",
+      accent: "#F97316" },
+    { id: "falconai", badge: "AI / LLM", status: "1,187 commits",
+      title: "FalconAI", subtitle: "AI Gateway & LLM Orchestration",
+      desc: "Core contributor to AI gateway infrastructure for enterprise clients. Multi-model orchestration across gpt-4, claude-3, and gemini with intelligent routing and fallbacks.",
+      tech: ["Python", "LLM", "LangChain", "AI Gateway"], url: "https://github.com/zionmezba/FalconAI",
+      accent: "#A855F7" },
+    { id: "routine", badge: "Automation", status: "Daily Active",
+      title: "DIU Routine Scrapper", subtitle: "University Automation Platform",
+      desc: "Centralized automation for Daffodil International University. Scrapes official routines, builds CSE databases, FCM push notifications, and full Android app.",
+      tech: ["Python Flask", "SocketIO", "Firebase FCM", "Android"], url: "https://routine.zohirrayhan.me/",
+      accent: "#F97316" },
+    { id: "studenthub", badge: "SaaS", status: "Live System",
+      title: "Student Hub", subtitle: "University Management System",
+      desc: "Official university platform with orientation signup, digital food tokens, club management with payments, and dynamic course enrollment.",
+      tech: ["Laravel", "Blade", "MySQL", "JWT"], url: "https://studentshub.daffodilvarsity.edu.bd/team",
+      accent: "#3B82F6" },
+    { id: "neuralops", badge: "AI / Ops", status: "Active development",
+      title: "Neural Ops", subtitle: "AI Gateway Admin Control Plane",
+      desc: "Multi-provider AI gateway with live admin dashboard. Rate limiting, API key management, usage analytics, provider health, and one-click operational controls.",
+      tech: ["Node.js", "TypeScript", "Fastify", "React", "Recharts"], url: "https://github.com/Th3X-Zohir/neural-ops-ai-gateway",
+      accent: "#22C55E" },
+    { id: "ecomai", badge: "E-Commerce", status: "96 commits",
+      title: "ecomai", subtitle: "Multi-Tenant SaaS Platform",
+      desc: "Shopify-alternative with multi-tenant architecture, Stripe payments, subscription billing, delivery tracking, and admin dashboards — one codebase, multiple stores.",
+      tech: ["Next.js", "TypeScript", "Stripe", "PostgreSQL"], url: "https://github.com/Th3X-Zohir/ecomai",
+      accent: "#F97316" },
+    { id: "linkpay", badge: "FinTech", status: "56 commits",
+      title: "LINKPAY", subtitle: "Payment Integration Platform",
+      desc: "Payment gateway integration connecting multiple providers with modern architecture for reliable, secure, and scalable transaction processing.",
+      tech: ["TypeScript", "Node.js", "Payment APIs"], url: "https://github.com/Th3X-Zohir/LINKPAY",
+      accent: "#22C55E" },
+    { id: "bloodbridge", badge: "Healthcare", status: "Live System",
+      title: "Blood Bridge", subtitle: "Blood Donor Finder",
+      desc: "Real-time geolocation-based donor finder with interactive maps, blood group filtering by radius, live donor ETA tracking, and community feed for urgent requests.",
+      tech: ["Python Flask", "Leaflet.js", "MySQL", "Geolocation"], url: "https://blood.shafinahmed.site/find-donor/dummy",
+      accent: "#EF4444" },
+  ];
+
+  const [current, setCurrent] = useState(0);
+
   const icons: Record<string, ReactNode> = {
-    efamily: <Building2 size={28} color={accent} />,
-    rschat: <Radio size={28} color={accent} />,
-    falconai: <Brain size={28} color={accent} />,
-    neuralops: <Cpu size={28} color={accent} />,
-    routine: <Database size={28} color={accent} />,
-    studenthub: <Users size={28} color={accent} />,
-    ecomai: <ShoppingCart size={28} color={accent} />,
-    linkpay: <Link2 size={28} color={accent} />,
-    bloodbridge: <HeartPulse size={28} color={accent} />,
-  };
-  const labels: Record<string, string> = {
-    efamily: "Legal Tech",
-    rschat: "Real-Time",
-    falconai: "AI / LLM",
-    neuralops: "AI Ops",
-    routine: "Automation",
-    studenthub: "EdTech",
-    ecomai: "SaaS",
-    linkpay: "FinTech",
-    bloodbridge: "HealthTech",
+    efamily: <Building2 size={36} color={projects[current].accent} />,
+    rschat: <Radio size={36} color={projects[current].accent} />,
+    falconai: <Brain size={36} color={projects[current].accent} />,
+    neuralops: <Cpu size={36} color={projects[current].accent} />,
+    routine: <Database size={36} color={projects[current].accent} />,
+    studenthub: <Users size={36} color={projects[current].accent} />,
+    ecomai: <ShoppingCart size={36} color={projects[current].accent} />,
+    linkpay: <Link2 size={36} color={projects[current].accent} />,
+    bloodbridge: <HeartPulse size={36} color={projects[current].accent} />,
   };
 
-  return (
-    <div className={`bento-visual vis--${id}`}>
-      <div className="bento-visual-grid" />
-      <div className="bento-visual-glow" />
-      <div className="bento-visual-overlay" />
-      <div className="bento-visual-center">
-        <div className="bento-visual-icon">{icons[id]}</div>
-        <div className="bento-visual-label">{labels[id]}</div>
-      </div>
-    </div>
-  );
-}
+  const go = (i: number) => {
+    setCurrent((((i % projects.length) + projects.length) % projects.length));
+  };
 
-// ============================================================
-// BENTO CARD — self-contained reveal + grid positioning
-// ============================================================
-function BentoCard({
-  id, title, subtitle, desc, tech, url, accent, badge, badgeClass, status, size, index = 0
-}: {
-  id: string; title: string; subtitle: string; desc: string; tech: string[];
-  url: string; accent: string; badge: string; badgeClass?: string; status: string; size: string; index?: number;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-60px" });
-  const isLive = status === "Live System" || status === "Daily Active" || status === "Active development";
-  const staggerDelay = Math.min(index * 0.06, 0.4);
+  const p = projects[current];
+  const num = String(current + 1).padStart(2, "0");
+  const isLive = p.status === "Live System" || p.status === "Daily Active" || p.status === "Active development";
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 36 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
-      transition={{ duration: 0.6, delay: staggerDelay, ease: [0.16, 1, 0.3, 1] }}
-      className={`bento-card ${size}`}
-      style={{ "--proj-accent": accent } as React.CSSProperties}
-    >
-      <a href={url} target="_blank" rel="noopener noreferrer" className="bento-link">
-        <BentoVisual id={id} accent={accent} />
-        <div className="bento-body">
-          <div className="bento-meta">
-            <span className={`bento-badge ${badgeClass || ""}`}>{badge}</span>
-            {isLive ? (
-              <span className="live-indicator"><span className="live-dot" />{status}</span>
-            ) : (
-              <span className="bento-status">{status}</span>
-            )}
+    <div className="carousel-wrapper">
+      <motion.div
+        key={current}
+        initial={{ opacity: 0, x: 40 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="carousel-slide"
+      >
+        {/* Visual panel */}
+        <div className="proj-visual">
+          <div className={`proj-visual-bg vis-bg--${p.id}`} />
+          <div className="proj-visual-grid" />
+          <div className="proj-visual-glow" />
+          <div className="proj-visual-center">
+            <div className="proj-icon-wrap">
+              {icons[p.id]}
+            </div>
+            <span className="proj-badge" style={{ color: p.accent, borderColor: p.accent + "50", background: p.accent + "15" }}>
+              {p.badge}
+            </span>
           </div>
-          <div className="bento-title-row">
-            <h3>{title}</h3>
-            <ExternalLink size={14} className="bento-arrow" />
-          </div>
-          <p className="bento-subtitle">{subtitle}</p>
-          <p className="bento-desc">{desc}</p>
-          <div className="bento-tech">
-            {tech.map((t) => <span key={t} className="tech-tag">{t}</span>)}
+          {isLive && (
+            <div className="proj-live">
+              <span className="live-dot" />{p.status}
+            </div>
+          )}
+        </div>
+
+        {/* Content panel */}
+        <div className="proj-content">
+          <div className="proj-content-inner">
+            <div className="proj-number">{num}</div>
+            <div className="proj-info">
+              <div className="proj-title-row">
+                <h3>{p.title}</h3>
+                <a href={p.url} target="_blank" rel="noopener noreferrer" className="proj-link-btn">
+                  View <ExternalLink size={13} />
+                </a>
+              </div>
+              <p className="proj-subtitle">{p.subtitle}</p>
+              <p className="proj-desc">{p.desc}</p>
+              <div className="proj-tech">
+                {p.tech.map((t) => <span key={t} className="tech-tag">{t}</span>)}
+              </div>
+            </div>
           </div>
         </div>
-      </a>
-    </motion.div>
+      </motion.div>
+
+      {/* Navigation */}
+      <div className="proj-nav">
+        <div className="proj-nav-inner">
+          <button className="proj-arrow" onClick={() => go(current - 1)} aria-label="Previous">
+            <ArrowRight size={16} style={{ transform: "rotate(180deg)" }} />
+          </button>
+          <div className="proj-dots">
+            {projects.map((_, i) => (
+              <button
+                key={i}
+                className={`proj-dot ${i === current ? "active" : ""}`}
+                onClick={() => go(i)}
+                aria-label={`Project ${i + 1}`}
+                style={i === current ? { background: projects[current].accent, borderColor: projects[current].accent, boxShadow: `0 0 8px ${projects[current].accent}80` } : {}}
+              />
+            ))}
+          </div>
+          <button className="proj-arrow" onClick={() => go(current + 1)} aria-label="Next">
+            <ArrowRight size={16} />
+          </button>
+        </div>
+        <p className="proj-counter">{current + 1} / {projects.length}</p>
+      </div>
+    </div>
   );
 }
 
@@ -527,63 +592,6 @@ function About() {
 // PROJECTS — Bento Grid
 // ============================================================
 function Projects() {
-  const projects = [
-    // Featured — E-Family Court (full width)
-    { id: "efamily", badge: "Government", badgeClass: "blue", status: "Live System",
-      title: "E-Family Court", subtitle: "National e-Judiciary Platform — Bangladesh",
-      desc: "Full-stack developer on Bangladesh's end-to-end digital case filing system for Family Courts. Citizens file cases, track progress, and make payments online. Judges manage hearings; lawyers submit documents. Deployed across Dhaka and Chattogram.",
-      tech: ["Laravel", "PHP", "MSSQL", "JWT", "dompdf"], url: "https://efamilycourt.judiciary.gov.bd/",
-      accent: "#3B82F6", size: "bento-featured" },
-    // Wide — RSChat
-    { id: "rschat", badge: "Real-Time", badgeClass: "orange", status: "1,874 commits",
-      title: "RSChat", subtitle: "Production WebSocket Infrastructure",
-      desc: "Production-grade real-time chat handling thousands of concurrent connections. WebSocket rooms, admin dashboards, user panels, and full TypeScript throughout.",
-      tech: ["TypeScript", "Socket.io", "Node.js", "WebSockets"], url: "https://github.com/Th3X-Zohir/RSChat",
-      accent: "#F97316", size: "bento-wide" },
-    // Wide — FalconAI
-    { id: "falconai", badge: "AI / LLM", badgeClass: "green", status: "1,187 commits",
-      title: "FalconAI", subtitle: "AI Gateway & LLM Orchestration",
-      desc: "Core contributor to AI gateway infrastructure for enterprise clients. Multi-model orchestration across gpt-4, claude-3, and gemini with intelligent routing and fallbacks.",
-      tech: ["Python", "LLM", "LangChain", "AI Gateway"], url: "https://github.com/zionmezba/FalconAI",
-      accent: "#A855F7", size: "bento-wide" },
-    // Standard — DIU Routine
-    { id: "routine", badge: "Automation", badgeClass: "orange", status: "Daily Active",
-      title: "DIU Routine Scrapper", subtitle: "University Automation Platform",
-      desc: "Centralized automation for Daffodil International University. Scrapes official routines, builds CSE databases, FCM push notifications, and full Android app.",
-      tech: ["Python Flask", "SocketIO", "Firebase FCM", "Android"], url: "https://routine.zohirrayhan.me/",
-      accent: "#F97316", size: "bento-std" },
-    // Standard — Student Hub
-    { id: "studenthub", badge: "SaaS", badgeClass: "", status: "Live System",
-      title: "Student Hub", subtitle: "University Management System",
-      desc: "Official university platform with orientation signup, digital food tokens, club management with payments, and dynamic course enrollment.",
-      tech: ["Laravel", "Blade", "MySQL", "JWT"], url: "https://studentshub.daffodilvarsity.edu.bd/team",
-      accent: "#3B82F6", size: "bento-std" },
-    // Standard — Neural Ops
-    { id: "neuralops", badge: "AI / Ops", badgeClass: "green", status: "Active development",
-      title: "Neural Ops", subtitle: "AI Gateway Admin Control Plane",
-      desc: "Multi-provider AI gateway with live admin dashboard. Rate limiting, API key management, usage analytics, provider health, and one-click operational controls.",
-      tech: ["Node.js", "TypeScript", "Fastify", "React", "Recharts"], url: "https://github.com/Th3X-Zohir/neural-ops-ai-gateway",
-      accent: "#22C55E", size: "bento-std" },
-    // Wide — ecomai
-    { id: "ecomai", badge: "E-Commerce", badgeClass: "", status: "96 commits",
-      title: "ecomai", subtitle: "Multi-Tenant SaaS Platform",
-      desc: "Shopify-alternative with multi-tenant architecture, Stripe payments, subscription billing, delivery tracking, and admin dashboards — one codebase, multiple stores.",
-      tech: ["Next.js", "TypeScript", "Stripe", "PostgreSQL"], url: "https://github.com/Th3X-Zohir/ecomai",
-      accent: "#F97316", size: "bento-wide" },
-    // Standard — LINKPAY
-    { id: "linkpay", badge: "FinTech", badgeClass: "green", status: "56 commits",
-      title: "LINKPAY", subtitle: "Payment Integration Platform",
-      desc: "Payment gateway integration connecting multiple providers with modern architecture for reliable, secure, and scalable transaction processing.",
-      tech: ["TypeScript", "Node.js", "Payment APIs"], url: "https://github.com/Th3X-Zohir/LINKPAY",
-      accent: "#22C55E", size: "bento-std" },
-    // Standard — Blood Bridge
-    { id: "bloodbridge", badge: "Healthcare", badgeClass: "blue", status: "Live System",
-      title: "Blood Bridge", subtitle: "Blood Donor Finder",
-      desc: "Real-time geolocation-based donor finder with interactive maps, blood group filtering by radius, live donor ETA tracking, and community feed for urgent requests.",
-      tech: ["Python Flask", "Leaflet.js", "MySQL", "Geolocation"], url: "https://blood.shafinahmed.site/find-donor/dummy",
-      accent: "#EF4444", size: "bento-std" },
-  ];
-
   return (
     <section className="section" id="projects">
       <div className="container">
@@ -595,12 +603,7 @@ function Projects() {
             judiciary, universities, and startups.
           </p>
         </Reveal>
-
-        <div className="bento-grid">
-          {projects.map((p, i) => (
-            <BentoCard key={p.id} {...p} index={i} />
-          ))}
-        </div>
+        <ProjectsCarousel />
       </div>
     </section>
   );
