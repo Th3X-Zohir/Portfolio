@@ -5,11 +5,42 @@ import { motion, useMotionValue, useSpring, useTransform, useInView } from "fram
 import {
   Github, Linkedin, Mail, ArrowRight, Menu, X,
   ExternalLink, Brain, Zap, Shield, Database, Radio,
-  ShoppingCart, Globe, Users, Building2, HeartPulse, Link2, Cpu
+  ShoppingCart, Globe, Users, Building2, HeartPulse, Link2, Cpu, Sparkles
 } from "lucide-react";
 
 // ============================================================
-// MAGNETIC BUTTON — cursor-attracted, zero re-renders
+// TEXT SCRAMBLE — matrix-style decode on load
+// ============================================================
+function useTextScramble(target: string) {
+  const [display, setDisplay] = useState(target);
+  const [done, setDone] = useState(false);
+  const iterationRef = useRef(0);
+  const chars = "!@#$%^&*><abcdefghijklmnopqrstuvwxyz";
+
+  useEffect(() => {
+    let frame = 0;
+    const totalFrames = target.length * 3;
+    const animate = () => {
+      if (frame >= totalFrames) { setDisplay(target); setDone(true); return; }
+      setDisplay(
+        target.split("").map((char, i) => {
+          if (i < Math.floor(frame / 3)) return char;
+          return chars[Math.floor(Math.random() * chars.length)];
+        }).join("")
+      );
+      frame++;
+      requestAnimationFrame(animate);
+    };
+    const id = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target]);
+
+  return { display, done };
+}
+
+// ============================================================
+// MAGNETIC BUTTON — cursor-attracted, pure useMotionValue
 // ============================================================
 function MagneticButton({ children, className = "", href = "#", variant = "primary" }: {
   children: ReactNode; className?: string; href?: string; variant?: "primary" | "outline";
@@ -22,16 +53,13 @@ function MagneticButton({ children, className = "", href = "#", variant = "prima
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = ref.current!.getBoundingClientRect();
-    const dx = e.clientX - (rect.left + rect.width / 2);
-    const dy = e.clientY - (rect.top + rect.height / 2);
-    x.set(dx * 0.25);
-    y.set(dy * 0.25);
+    x.set(e.clientX - (rect.left + rect.width / 2));
+    y.set(e.clientY - (rect.top + rect.height / 2));
   };
 
   return (
     <motion.a
-      ref={ref}
-      href={href}
+      ref={ref} href={href}
       className={`btn ${variant === "primary" ? "btn-primary" : "btn-outline"} ${className}`}
       style={{ x: springX, y: springY }}
       onMouseMove={handleMouseMove}
@@ -43,47 +71,17 @@ function MagneticButton({ children, className = "", href = "#", variant = "prima
 }
 
 // ============================================================
-// TILT CARD — mouse-tracking 3D perspective
-// ============================================================
-function TiltCard({ children, className = "" }: { children: ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0.5);
-  const y = useMotionValue(0.5);
-  const rotateX = useTransform(y, [0, 1], [6, -6]);
-  const rotateY = useTransform(x, [0, 1], [-6, 6]);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    x.set((e.clientX - rect.left) / rect.width);
-    y.set((e.clientY - rect.top) / rect.height);
-  };
-
-  return (
-    <motion.div
-      ref={ref}
-      className={className}
-      style={{ rotateX, rotateY, transformPerspective: 1000 }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => { x.set(0.5); y.set(0.5); }}
-      transition={{ type: "spring", stiffness: 200, damping: 30 }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-// ============================================================
-// REVEAL — scroll-triggered fade + slide
+// SCROLL REVEAL — fade + translateY with viewport trigger
 // ============================================================
 function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-60px" });
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 28 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
-      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0, y: 32 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
+      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
       className={className}
     >
       {children}
@@ -92,18 +90,16 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
 }
 
 // ============================================================
-// STAGGER CONTAINER — blur + fade sequential reveal
+// STAGGER CONTAINER — blur + fade sequential
 // ============================================================
-function StaggerContainer({ children, className = "" }: { children: ReactNode; className?: string }) {
+function StaggerContainer({ children, className = "", delayChildren = 0.05 }: { children: ReactNode; className?: string; delayChildren?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
   return (
     <motion.div
-      ref={ref}
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
+      ref={ref} initial="hidden" animate={isInView ? "visible" : "hidden"}
       variants={{
-        visible: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+        visible: { transition: { staggerChildren: 0.08, delayChildren } },
         hidden: {},
       }}
       className={className}
@@ -128,31 +124,134 @@ function StaggerItem({ children, className = "" }: { children: ReactNode; classN
 }
 
 // ============================================================
-// PROJECT CARD — uniform height, CSS-generated visual
+// SCROLL PROGRESS BAR
 // ============================================================
-function ProjectVisual({ id, accent, label }: { id: string; accent: string; label: string }) {
+function ScrollProgress() {
+  const scaleX = useMotionValue(0);
+  const scaleXSpring = useSpring(scaleX, { stiffness: 100, damping: 20 });
+
+  useEffect(() => {
+    const onScroll = () => {
+      const el = document.documentElement;
+      const scrolled = el.scrollTop;
+      const total = el.scrollHeight - el.clientHeight;
+      scaleX.set(total > 0 ? scrolled / total : 0);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [scaleX]);
+
+  return (
+    <motion.div
+      className="scroll-progress"
+      style={{ scaleX: scaleXSpring, width: "100%" }}
+    />
+  );
+}
+
+// ============================================================
+// MARQUEE TICKER
+// ============================================================
+function Marquee() {
+  const items = [
+    "TypeScript", "Python", "Laravel", "Next.js", "LLM Orchestration",
+    "WebSockets", "PostgreSQL", "LangChain", "Docker", "FastAPI",
+    "AI Gateway", "RBAC", "JWT Auth", "Firebase", "Redis",
+  ];
+  const doubled = [...items, ...items];
+
+  return (
+    <div className="marquee-section">
+      <div className="marquee-track">
+        {doubled.map((item, i) => (
+          <span key={i} className="marquee-item">
+            {item} <span className="sep">&#9830;</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// PROJECT VISUAL — CSS-generated background with icon
+// ============================================================
+function BentoVisual({ id, accent }: { id: string; accent: string }) {
   const icons: Record<string, ReactNode> = {
-    efamily: <Building2 size={32} color={accent} />,
-    rschat: <Radio size={32} color={accent} />,
-    falconai: <Brain size={32} color={accent} />,
-    neuralops: <Cpu size={32} color={accent} />,
-    routine: <Database size={32} color={accent} />,
-    studenthub: <Users size={32} color={accent} />,
-    ecomai: <ShoppingCart size={32} color={accent} />,
-    linkpay: <Link2 size={32} color={accent} />,
-    bloodbridge: <HeartPulse size={32} color={accent} />,
+    efamily: <Building2 size={28} color={accent} />,
+    rschat: <Radio size={28} color={accent} />,
+    falconai: <Brain size={28} color={accent} />,
+    neuralops: <Cpu size={28} color={accent} />,
+    routine: <Database size={28} color={accent} />,
+    studenthub: <Users size={28} color={accent} />,
+    ecomai: <ShoppingCart size={28} color={accent} />,
+    linkpay: <Link2 size={28} color={accent} />,
+    bloodbridge: <HeartPulse size={28} color={accent} />,
+  };
+  const labels: Record<string, string> = {
+    efamily: "Legal Tech",
+    rschat: "Real-Time",
+    falconai: "AI / LLM",
+    neuralops: "AI Ops",
+    routine: "Automation",
+    studenthub: "EdTech",
+    ecomai: "SaaS",
+    linkpay: "FinTech",
+    bloodbridge: "HealthTech",
   };
 
   return (
-    <div className={`proj-visual proj-visual--${id}`}>
-      <div className="proj-visual-grid" />
-      <div className="proj-visual-center">
-        <div className="proj-visual-icon">{icons[id]}</div>
-        <div className="proj-visual-label">{label}</div>
+    <div className={`bento-visual vis--${id}`}>
+      <div className="bento-visual-grid" />
+      <div className="bento-visual-glow" />
+      <div className="bento-visual-center">
+        <div className="bento-visual-icon">{icons[id]}</div>
+        <div className="bento-visual-label">{labels[id]}</div>
       </div>
-      {/* Ambient glow */}
-      <div className="proj-visual-glow" style={{ background: `radial-gradient(ellipse 60% 60% at 50% 50%, ${accent}22 0%, transparent 70%)` }} />
     </div>
+  );
+}
+
+// ============================================================
+// BENTO CARD
+// ============================================================
+function BentoCard({
+  id, title, subtitle, desc, tech, url, accent, badge, badgeClass, status, size
+}: {
+  id: string; title: string; subtitle: string; desc: string; tech: string[];
+  url: string; accent: string; badge: string; badgeClass?: string; status: string; size: string;
+}) {
+  const isLive = status === "Live System" || status === "Daily Active" || status === "Active development";
+
+  return (
+    <motion.a
+      href={url} target="_blank" rel="noopener noreferrer"
+      className={`bento-card ${size}`}
+      style={{ "--proj-accent": accent } as React.CSSProperties}
+      whileHover={{ y: -4 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    >
+      <BentoVisual id={id} accent={accent} />
+      <div className="bento-body">
+        <div className="bento-meta">
+          <span className={`bento-badge ${badgeClass || ""}`}>{badge}</span>
+          {isLive ? (
+            <span className="live-indicator"><span className="live-dot" />{status}</span>
+          ) : (
+            <span className="bento-status">{status}</span>
+          )}
+        </div>
+        <div className="bento-title-row">
+          <h3>{title}</h3>
+          <ExternalLink size={14} className="bento-arrow" />
+        </div>
+        <p className="bento-subtitle">{subtitle}</p>
+        <p className="bento-desc">{desc}</p>
+        <div className="bento-tech">
+          {tech.map((t) => <span key={t} className="tech-tag">{t}</span>)}
+        </div>
+      </div>
+    </motion.a>
   );
 }
 
@@ -215,11 +314,9 @@ function Navbar() {
             <X size={24} />
           </button>
           {links.map((l, i) => (
-            <motion.a
-              key={l.href} href={l.href} onClick={() => setMobileOpen(false)}
+            <motion.a key={l.href} href={l.href} onClick={() => setMobileOpen(false)}
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-            >
+              transition={{ delay: i * 0.05 }}>
               {l.label}
             </motion.a>
           ))}
@@ -237,96 +334,126 @@ function Navbar() {
 // HERO
 // ============================================================
 function Hero() {
+  const { display: nameDisplay } = useTextScramble("Zohir Rayhan");
+  const { display: taglineDisplay } = useTextScramble("I build AI systems that ship.");
+  const ref = useRef<HTMLDivElement>(null);
+  const heroImgY = useMotionValue(0);
+  const heroImgYSpring = useSpring(heroImgY, { stiffness: 60, damping: 20 });
+
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  useEffect(() => {
+    const onScroll = () => {
+      heroImgY.set(window.scrollY * 0.15);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [heroImgY]);
+
   return (
-    <section className="hero" id="hero">
-      <div className="hero-bg-img" />
-      <div className="hero-grid-overlay" />
-      <div className="hero-gradient-vignette" />
+    <section className="hero" id="hero" ref={ref}>
+      <div className="hero-bg-grid" />
+      <div className="hero-bg-glow" />
 
       <div className="container">
-        <motion.div
-          className="hero-content"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div className="hero-eyebrow">AI-Native Full-Stack Developer</div>
+        <div className="hero-inner">
+          {/* Left — text content */}
+          <div className="hero-text">
+            <motion.div
+              className="hero-eyebrow"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Sparkles size={11} />
+              AI-Native Full-Stack Developer
+            </motion.div>
 
-          <motion.h1
-            className="hero-name"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          >
-            Zohir Rayhan<span className="dot">.</span>
-          </motion.h1>
+            <motion.h1
+              className="hero-name"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {nameDisplay}<span className="dot">.</span>
+            </motion.h1>
 
-          <motion.p
-            className="hero-role"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          >
-            I build AI systems and digital products that run in production.
-          </motion.p>
+            <motion.p
+              className="hero-tagline"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {taglineDisplay}
+            </motion.p>
 
-          <motion.p
-            className="hero-bio"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          >
-            Full-stack developer specializing in <strong>AI/LLM orchestration</strong>,{" "}
-            <strong>government-scale platforms</strong>, and <strong>production SaaS products</strong>. Over
-            5 years, 6,700+ commits across 67 repositories — building systems that serve thousands of real users
-            in Bangladesh's courts, universities, and startups.
-          </motion.p>
+            <motion.p
+              className="hero-bio"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              Full-stack developer specializing in <strong>AI/LLM orchestration</strong>,{" "}
+              <strong>government-scale platforms</strong>, and <strong>production SaaS products</strong>.{" "}
+              6,700+ commits across 67 repositories — systems that serve thousands of real users
+              in Bangladesh's courts, universities, and startups.
+            </motion.p>
 
+            <motion.div
+              className="hero-actions"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <MagneticButton href="#projects" variant="primary">
+                View Projects <ArrowRight size={15} />
+              </MagneticButton>
+              <MagneticButton href="#contact" variant="outline">
+                Get in Touch
+              </MagneticButton>
+            </motion.div>
+          </div>
+
+          {/* Right — visual panel */}
           <motion.div
-            className="hero-actions"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="hero-visual"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            style={{ y: heroImgYSpring }}
           >
-            <MagneticButton href="#projects" variant="primary">
-              View Projects <ArrowRight size={16} />
-            </MagneticButton>
-            <MagneticButton href="#contact" variant="outline">
-              Get in Touch
-            </MagneticButton>
-          </motion.div>
+            <div className="hero-visual-inner">
+              <div className="hero-visual-bg" />
+              <div className="hero-visual-grid" />
+              <div className="hero-visual-content">
+                <div className="hero-visual-icon">
+                  <Brain size={40} color="var(--color-accent)" />
+                </div>
+                <div className="hero-visual-name">Zohir Rayhan</div>
+                <div className="hero-visual-role">AI-Native Full-Stack</div>
+              </div>
+              <div className="hero-visual-glow" />
 
-          <motion.div
-            className="hero-metrics"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className="hero-metric">
-              <span className="hero-metric-value"><span className="accent">6.7</span>K+</span>
-              <span className="hero-metric-label">Commits</span>
-            </div>
-            <div className="hero-metric-divider" />
-            <div className="hero-metric">
-              <span className="hero-metric-value">67</span>
-              <span className="hero-metric-label">Repos</span>
-            </div>
-            <div className="hero-metric-divider" />
-            <div className="hero-metric">
-              <span className="hero-metric-value">5+</span>
-              <span className="hero-metric-label">Years</span>
-            </div>
-            <div className="hero-metric-divider" />
-            <div className="hero-metric">
-              <span className="hero-metric-value">27+</span>
-              <span className="hero-metric-label">Projects</span>
+              {/* Floating metric cards */}
+              <div className="hero-metric-float hero-metric-float--1">
+                <div className="hero-metric-float-value">
+                  <span className="accent">6.7</span>K+
+                </div>
+                <div className="hero-metric-float-label">Commits</div>
+              </div>
+              <div className="hero-metric-float hero-metric-float--2">
+                <div className="hero-metric-float-value">
+                  <span className="accent">27+</span>
+                </div>
+                <div className="hero-metric-float-label">Live Projects</div>
+              </div>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
 
       <div className="hero-scroll-hint">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M12 5v14M5 12l7 7 7-7" />
         </svg>
         Scroll
@@ -340,33 +467,17 @@ function Hero() {
 // ============================================================
 function About() {
   const strengths = [
-    {
-      icon: <Brain size={13} />,
-      title: "AI-Native Architecture",
-      desc: "LLM orchestration, AI gateways, function calling, and vector databases at production scale.",
-    },
-    {
-      icon: <Building2 size={13} />,
-      title: "Government-Scale Platforms",
-      desc: "End-to-end digital systems for e-Judiciary — case filing, tracking, payments, and SMS/email workflows.",
-    },
-    {
-      icon: <Zap size={13} />,
-      title: "Full-Stack Delivery",
-      desc: "End-to-end product builds: Laravel backends, Next.js frontends, real-time features, and deployment.",
-    },
-    {
-      icon: <Shield size={13} />,
-      title: "Enterprise Security",
-      desc: "RBAC, JWT authentication, multi-role panels, and secure payment processing.",
-    },
+    { icon: <Brain size={12} />, title: "AI-Native Architecture", desc: "LLM orchestration, AI gateways, function calling, and vector databases at production scale." },
+    { icon: <Building2 size={12} />, title: "Government-Scale Platforms", desc: "End-to-end digital systems for e-Judiciary — case filing, tracking, payments, and SMS/email workflows." },
+    { icon: <Zap size={12} />, title: "Full-Stack Delivery", desc: "End-to-end builds: Laravel backends, Next.js frontends, real-time features, and production deployment." },
+    { icon: <Shield size={12} />, title: "Enterprise Security", desc: "RBAC, JWT authentication, multi-role panels, and secure payment processing." },
   ];
 
   return (
-    <section className="section section-alt" id="about">
+    <section className="section" id="about">
       <div className="container">
         <div className="about-grid">
-          <Reveal className="about-bio">
+          <Reveal>
             <div className="section-label">About</div>
             <h2>Production systems,<br />not pet projects.</h2>
             <p>
@@ -406,252 +517,65 @@ function About() {
 }
 
 // ============================================================
-// GOVERNMENT CARD — Horizontal split, accent bar, impact stats
+// PROJECTS — Bento Grid
 // ============================================================
-function GovCard({ project }: { project: NonNullable<ReturnType<typeof getProjects>[0]> }) {
-  return (
-    <Reveal>
-      <a
-        href={project.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="gov-card"
-        style={{ "--proj-accent": project.accent } as React.CSSProperties}
-      >
-        {/* Left accent bar */}
-        <div className="gov-card-accent" />
-
-        {/* Visual panel */}
-        <div className="gov-card-visual">
-          <div className="gov-card-visual-inner">
-            <div className="gov-card-grid" />
-            <div className="gov-card-visual-content">
-              <div className="gov-card-icon-wrap">
-                <Building2 size={36} color={project.accent} />
-              </div>
-              <div className="gov-card-visual-label">National Platform</div>
-            </div>
-            <div className="gov-card-visual-glow" />
-          </div>
-        </div>
-
-        {/* Content panel */}
-        <div className="gov-card-content">
-          <div className="gov-card-top">
-            <div className="gov-card-badges">
-              <span className="gov-badge">
-                <span className="gov-badge-dot" />
-                {project.badge}
-              </span>
-              <span className="gov-card-status">{project.status}</span>
-            </div>
-            <h3 className="gov-card-title">{project.title}</h3>
-            <p className="gov-card-subtitle">{project.subtitle}</p>
-          </div>
-
-          <p className="gov-card-desc">{project.desc}</p>
-
-          {/* Impact stats */}
-          <div className="gov-card-stats">
-            <div className="gov-stat">
-              <span className="gov-stat-value">2</span>
-              <span className="gov-stat-label">Major Cities</span>
-            </div>
-            <div className="gov-stat-div" />
-            <div className="gov-stat">
-              <span className="gov-stat-value">e-Judiciary</span>
-              <span className="gov-stat-label">Bangladesh</span>
-            </div>
-            <div className="gov-stat-div" />
-            <div className="gov-stat">
-              <span className="gov-stat-value">Live</span>
-              <span className="gov-stat-label">2025</span>
-            </div>
-          </div>
-
-          <div className="gov-card-footer">
-            <div className="gov-card-tech">
-              {project.tech.map((t) => (
-                <span key={t} className="gov-tech-tag">{t}</span>
-              ))}
-            </div>
-            <span className="gov-card-link">
-              View Platform <ArrowRight size={14} />
-            </span>
-          </div>
-        </div>
-      </a>
-    </Reveal>
-  );
-}
-
-// ============================================================
-// REGULAR PROJECT CARD
-// ============================================================
-function RegularCard({ project }: { project: NonNullable<ReturnType<typeof getProjects>[0]> }) {
-  return (
-    <Reveal delay={(0) * 0.08}>
-      <a
-        href={project.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="proj-card"
-        style={{ "--proj-accent": project.accent } as React.CSSProperties}
-      >
-        <div className="proj-card-visual">
-          <ProjectVisual id={project.id} accent={project.accent} label={project.category} />
-        </div>
-        <div className="proj-card-body">
-          <div className="proj-card-meta">
-            <span className={`proj-badge ${project.badgeClass}`}>{project.badge}</span>
-            <span className="proj-status">{project.status}</span>
-          </div>
-          <div className="proj-card-title-row">
-            <h3>{project.title}</h3>
-            <ExternalLink size={14} className="proj-card-arrow" />
-          </div>
-          <p className="proj-card-subtitle">{project.subtitle}</p>
-          <p className="proj-card-desc">{project.desc}</p>
-          <div className="proj-card-tech">
-            {project.tech.map((t) => (
-              <span key={t} className="proj-tech-tag">{t}</span>
-            ))}
-          </div>
-        </div>
-      </a>
-    </Reveal>
-  );
-}
-
-// ============================================================
-// PROJECTS
-// ============================================================
-function getProjects() {
-  return [
-    {
-      id: "efamily",
-      badge: "Government",
-      badgeClass: "blue",
-      status: "Live System",
-      title: "E-Family Court",
-      subtitle: "National e-Judiciary Platform",
-      desc: "Full-stack developer on Bangladesh's end-to-end digital case filing system for Family Courts. Citizens file cases, track progress, and make payments online. Judges manage hearings; lawyers submit documents.",
-      tech: ["Laravel", "PHP", "MSSQL", "JWT", "dompdf"],
-      url: "https://efamilycourt.judiciary.gov.bd/",
-      accent: "#3B82F6",
-      category: "Legal Tech",
-    },
-    {
-      id: "rschat",
-      badge: "Real-Time",
-      badgeClass: "orange",
-      status: "1,874 commits",
-      title: "RSChat",
-      subtitle: "Real-Time Chat Platform",
-      desc: "Production-grade real-time chat infrastructure handling thousands of concurrent WebSocket connections. Admin moderation dashboards, user panels, and full TypeScript throughout.",
-      tech: ["TypeScript", "Socket.io", "Node.js", "WebSockets"],
-      url: "https://github.com/Th3X-Zohir/RSChat",
-      accent: "#F97316",
-      category: "Infrastructure",
-    },
-    {
-      id: "falconai",
-      badge: "AI / LLM",
-      badgeClass: "green",
-      status: "1,187 commits",
-      title: "FalconAI",
-      subtitle: "AI Gateway & LLM Orchestration",
-      desc: "Core contributor to AI gateway infrastructure providing multi-model orchestration for enterprise clients. Built intelligent routing, fallbacks, and multi-model pipelines.",
-      tech: ["Python", "LLM", "LangChain", "AI Gateway"],
-      url: "https://github.com/zionmezba/FalconAI",
-      accent: "#A855F7",
-      category: "AI Infrastructure",
-    },
-    {
-      id: "neuralops",
-      badge: "AI / Ops",
-      badgeClass: "green",
-      status: "Active development",
-      title: "Neural Ops",
-      subtitle: "AI Gateway Admin Control Plane",
-      desc: "Multi-provider AI gateway with a live admin dashboard for monitoring, rate limiting, API key management, usage analytics, provider health tracking, and one-click operational controls.",
-      tech: ["Node.js", "TypeScript", "Fastify", "React", "Recharts"],
-      url: "https://github.com/Th3X-Zohir/neural-ops-ai-gateway",
-      accent: "#22C55E",
-      category: "AI Operations",
-    },
-    {
-      id: "routine",
-      badge: "Automation",
-      badgeClass: "orange",
-      status: "Daily Active",
-      title: "DIU Routine Scrapper",
-      subtitle: "University Automation Platform",
-      desc: "Centralized automation platform for Daffodil International University. Scrapes official routines, builds CSE databases, precomputes schedules. FCM push notifications and full Android app.",
-      tech: ["Python Flask", "SocketIO", "Firebase FCM", "Android"],
-      url: "https://routine.zohirrayhan.me/",
-      accent: "#F97316",
-      category: "EdTech",
-    },
-    {
-      id: "studenthub",
-      badge: "SaaS",
-      badgeClass: "",
-      status: "Live System",
-      title: "Student Hub",
-      subtitle: "University Management System",
-      desc: "Official university management platform with orientation signup, digital food tokens, club management with payments and certificate generation, and dynamic course enrollment.",
-      tech: ["Laravel", "Blade", "MySQL", "JWT"],
-      url: "https://studentshub.daffodilvarsity.edu.bd/team",
-      accent: "#3B82F6",
-      category: "EdTech",
-    },
-    {
-      id: "ecomai",
-      badge: "E-Commerce",
-      badgeClass: "",
-      status: "96 commits",
-      title: "ecomai",
-      subtitle: "Multi-Tenant SaaS Platform",
-      desc: "Shopify-alternative e-commerce platform with multi-tenant architecture, Stripe payments, subscription billing, delivery tracking, and admin dashboards — one codebase, multiple stores.",
-      tech: ["Next.js", "TypeScript", "Stripe", "PostgreSQL"],
-      url: "https://github.com/Th3X-Zohir/ecomai",
-      accent: "#F97316",
-      category: "SaaS",
-    },
-    {
-      id: "linkpay",
-      badge: "FinTech",
-      badgeClass: "green",
-      status: "56 commits",
-      title: "LINKPAY",
-      subtitle: "Payment Integration Platform",
-      desc: "Payment gateway integration platform connecting multiple payment providers with modern architecture for reliable, secure, and scalable transaction processing.",
-      tech: ["TypeScript", "Node.js", "Payment APIs"],
-      url: "https://github.com/Th3X-Zohir/LINKPAY",
-      accent: "#22C55E",
-      category: "FinTech",
-    },
-    {
-      id: "bloodbridge",
-      badge: "Healthcare",
-      badgeClass: "blue",
-      status: "Live System",
-      title: "Blood Bridge",
-      subtitle: "Blood Donor Finder",
-      desc: "Real-time geolocation-based donor finder with interactive maps, blood group filtering by radius, live donor ETA tracking, and a community feed for urgent blood requests.",
-      tech: ["Python Flask", "Leaflet.js", "MySQL", "Geolocation"],
-      url: "https://blood.shafinahmed.site/find-donor/dummy",
-      accent: "#EF4444",
-      category: "HealthTech",
-    },
-  ];
-}
-
 function Projects() {
-  const projects = getProjects();
-  const govProject = projects[0];
-  const otherProjects = projects.slice(1);
+  const projects = [
+    // Featured — E-Family Court (full width)
+    { id: "efamily", badge: "Government", badgeClass: "blue", status: "Live System",
+      title: "E-Family Court", subtitle: "National e-Judiciary Platform — Bangladesh",
+      desc: "Full-stack developer on Bangladesh's end-to-end digital case filing system for Family Courts. Citizens file cases, track progress, and make payments online. Judges manage hearings; lawyers submit documents. Deployed across Dhaka and Chattogram.",
+      tech: ["Laravel", "PHP", "MSSQL", "JWT", "dompdf"], url: "https://efamilycourt.judiciary.gov.bd/",
+      accent: "#3B82F6", size: "bento-featured" },
+    // Wide — RSChat
+    { id: "rschat", badge: "Real-Time", badgeClass: "orange", status: "1,874 commits",
+      title: "RSChat", subtitle: "Production WebSocket Infrastructure",
+      desc: "Production-grade real-time chat handling thousands of concurrent connections. WebSocket rooms, admin dashboards, user panels, and full TypeScript throughout.",
+      tech: ["TypeScript", "Socket.io", "Node.js", "WebSockets"], url: "https://github.com/Th3X-Zohir/RSChat",
+      accent: "#F97316", size: "bento-wide" },
+    // Wide — FalconAI
+    { id: "falconai", badge: "AI / LLM", badgeClass: "green", status: "1,187 commits",
+      title: "FalconAI", subtitle: "AI Gateway & LLM Orchestration",
+      desc: "Core contributor to AI gateway infrastructure for enterprise clients. Multi-model orchestration across gpt-4, claude-3, and gemini with intelligent routing and fallbacks.",
+      tech: ["Python", "LLM", "LangChain", "AI Gateway"], url: "https://github.com/zionmezba/FalconAI",
+      accent: "#A855F7", size: "bento-wide" },
+    // Standard — DIU Routine
+    { id: "routine", badge: "Automation", badgeClass: "orange", status: "Daily Active",
+      title: "DIU Routine Scrapper", subtitle: "University Automation Platform",
+      desc: "Centralized automation for Daffodil International University. Scrapes official routines, builds CSE databases, FCM push notifications, and full Android app.",
+      tech: ["Python Flask", "SocketIO", "Firebase FCM", "Android"], url: "https://routine.zohirrayhan.me/",
+      accent: "#F97316", size: "bento-std" },
+    // Standard — Student Hub
+    { id: "studenthub", badge: "SaaS", badgeClass: "", status: "Live System",
+      title: "Student Hub", subtitle: "University Management System",
+      desc: "Official university platform with orientation signup, digital food tokens, club management with payments, and dynamic course enrollment.",
+      tech: ["Laravel", "Blade", "MySQL", "JWT"], url: "https://studentshub.daffodilvarsity.edu.bd/team",
+      accent: "#3B82F6", size: "bento-std" },
+    // Standard — Neural Ops
+    { id: "neuralops", badge: "AI / Ops", badgeClass: "green", status: "Active development",
+      title: "Neural Ops", subtitle: "AI Gateway Admin Control Plane",
+      desc: "Multi-provider AI gateway with live admin dashboard. Rate limiting, API key management, usage analytics, provider health, and one-click operational controls.",
+      tech: ["Node.js", "TypeScript", "Fastify", "React", "Recharts"], url: "https://github.com/Th3X-Zohir/neural-ops-ai-gateway",
+      accent: "#22C55E", size: "bento-std" },
+    // Wide — ecomai
+    { id: "ecomai", badge: "E-Commerce", badgeClass: "", status: "96 commits",
+      title: "ecomai", subtitle: "Multi-Tenant SaaS Platform",
+      desc: "Shopify-alternative with multi-tenant architecture, Stripe payments, subscription billing, delivery tracking, and admin dashboards — one codebase, multiple stores.",
+      tech: ["Next.js", "TypeScript", "Stripe", "PostgreSQL"], url: "https://github.com/Th3X-Zohir/ecomai",
+      accent: "#F97316", size: "bento-wide" },
+    // Standard — LINKPAY
+    { id: "linkpay", badge: "FinTech", badgeClass: "green", status: "56 commits",
+      title: "LINKPAY", subtitle: "Payment Integration Platform",
+      desc: "Payment gateway integration connecting multiple providers with modern architecture for reliable, secure, and scalable transaction processing.",
+      tech: ["TypeScript", "Node.js", "Payment APIs"], url: "https://github.com/Th3X-Zohir/LINKPAY",
+      accent: "#22C55E", size: "bento-std" },
+    // Standard — Blood Bridge
+    { id: "bloodbridge", badge: "Healthcare", badgeClass: "blue", status: "Live System",
+      title: "Blood Bridge", subtitle: "Blood Donor Finder",
+      desc: "Real-time geolocation-based donor finder with interactive maps, blood group filtering by radius, live donor ETA tracking, and community feed for urgent requests.",
+      tech: ["Python Flask", "Leaflet.js", "MySQL", "Geolocation"], url: "https://blood.shafinahmed.site/find-donor/dummy",
+      accent: "#EF4444", size: "bento-std" },
+  ];
 
   return (
     <section className="section" id="projects">
@@ -665,13 +589,11 @@ function Projects() {
           </p>
         </Reveal>
 
-        {/* Government card — horizontal split */}
-        <GovCard project={govProject} />
-
-        {/* Regular card grid */}
-        <div className="projects-grid">
-          {otherProjects.map((p, i) => (
-            <RegularCard key={p.id} project={p} />
+        <div className="bento-grid">
+          {projects.map((p, i) => (
+            <Reveal key={p.id} delay={(i % 3) * 0.07}>
+              <BentoCard {...p} />
+            </Reveal>
           ))}
         </div>
       </div>
@@ -680,7 +602,7 @@ function Projects() {
 }
 
 // ============================================================
-// SKILLS / STACK
+// SKILLS
 // ============================================================
 function Skills() {
   const categories = [
@@ -694,7 +616,7 @@ function Skills() {
     },
     {
       title: "AI & Data",
-      tags: ["OpenAI API", "LangChain", "Vector DBs", "Playwright", "Selenium", "Puppeteer", "Pandas"],
+      tags: ["OpenAI API", "LangChain", "Vector DBs", "Playwright", "Selenium", "Pandas"],
     },
     {
       title: "Infrastructure",
@@ -705,12 +627,10 @@ function Skills() {
   return (
     <section className="section section-alt" id="skills">
       <div className="container">
-        <Reveal>
+        <Reveal className="skills-header">
           <div className="section-label">Stack</div>
           <h2 className="section-heading">Tools of the trade.</h2>
-          <p className="section-sub">
-            The full stack, from AI models to production databases.
-          </p>
+          <p className="section-sub">The full stack, from AI models to production databases.</p>
         </Reveal>
 
         <StaggerContainer className="stack-grid">
@@ -733,7 +653,7 @@ function Skills() {
 }
 
 // ============================================================
-// EXPERIENCE / TIMELINE
+// EXPERIENCE
 // ============================================================
 function Experience() {
   const items = [
@@ -741,21 +661,21 @@ function Experience() {
       period: "2025 — Present",
       title: "E-Family Court Platform",
       subtitle: "Full-Stack Developer — Government Project",
-      desc: "Building Bangladesh's national e-filing platform for Family Courts. Handles case submission, payment processing, SMS/email notifications, judge dashboards, and lawyer portals. Microsoft SQL Server backend with Laravel, JWT auth, and dompdf for document generation.",
+      desc: "Building Bangladesh's national e-filing platform for Family Courts. Case submission, payment processing, SMS/email notifications, judge dashboards, and lawyer portals. Microsoft SQL Server backend with Laravel, JWT auth, and dompdf for document generation.",
       current: true,
     },
     {
       period: "2020 — Present",
       title: "Independent Development",
       subtitle: "Full-Stack Developer — Freelance",
-      desc: "Building and maintaining production systems across universities, fintech, and AI. RSChat (1,874 commits), DIU Routine Platform (daily active users), Student Hub, Blood Bridge, LINKPAY, and multiple AI gateway contributions. 6,700+ commits across 67 repositories.",
+      desc: "Building and maintaining production systems across universities, fintech, and AI. RSChat (1,874 commits), DIU Routine Platform, Student Hub, Blood Bridge, LINKPAY, and multiple AI gateway contributions. 6,700+ commits across 67 repositories.",
       current: false,
     },
     {
       period: "2020 — 2024",
       title: "University Tools & Automation",
       subtitle: "Student Developer — DIU",
-      desc: "Built the DIU Routine Scraper (Flask, SocketIO, FCM, Android), Student Hub (Laravel), and various campus tools. Served thousands of students and faculty daily with production-grade automation.",
+      desc: "Built the DIU Routine Scraper (Flask, SocketIO, FCM, Android), Student Hub (Laravel), and campus tools serving thousands of students and faculty daily.",
       current: false,
     },
   ];
@@ -763,18 +683,16 @@ function Experience() {
   return (
     <section className="section" id="experience">
       <div className="container">
-        <Reveal>
+        <Reveal className="experience-header">
           <div className="section-label">Experience</div>
           <h2 className="section-heading">Where I've worked.</h2>
-          <p className="section-sub">
-            A track record of production systems, not just coursework.
-          </p>
+          <p className="section-sub">A track record of production systems, not just coursework.</p>
         </Reveal>
 
         <StaggerContainer className="timeline">
           {items.map((item) => (
             <StaggerItem key={item.title}>
-              <div className="timeline-item">
+              <div className={`timeline-item ${item.current ? "current" : ""}`}>
                 <div className="timeline-marker">
                   <div className="timeline-marker-dot" />
                 </div>
@@ -810,41 +728,40 @@ function Contact() {
             </h2>
           </Reveal>
           <Reveal delay={0.15}>
-            <p className="contact-sub">
+            <p className="contact-sub" style={{ textAlign: "center" }}>
               Available for freelance projects, full-time roles, and long-term collaborations.
               I work across the stack — AI systems, SaaS platforms, or anything that needs shipping.
             </p>
           </Reveal>
+
           <Reveal delay={0.2}>
-            <a href="mailto:Zohirrayhanweb@gmail.com" className="contact-email">
-              Zohirrayhanweb@gmail.com
-            </a>
-            <div className="contact-availability">
-              <span className="nav-status-dot" />
-              Available for new projects
-            </div>
-          </Reveal>
-          <Reveal delay={0.25}>
-            <div className="contact-actions">
-              <MagneticButton href="mailto:Zohirrayhanweb@gmail.com" variant="primary">
-                <Mail size={16} /> Send Email
-              </MagneticButton>
-              <MagneticButton href="https://github.com/Th3X-Zohir" variant="outline">
-                <Github size={16} /> GitHub
-              </MagneticButton>
-            </div>
-          </Reveal>
-          <Reveal delay={0.3}>
-            <div className="contact-social">
-              <a href="https://github.com/Th3X-Zohir" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="GitHub">
-                <Github size={18} />
+            <div className="contact-card">
+              <a href="mailto:Zohirrayhanweb@gmail.com" className="contact-email">
+                Zohirrayhanweb@gmail.com
               </a>
-              <a href="https://linkedin.com/in/th3x-zohir" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="LinkedIn">
-                <Linkedin size={18} />
-              </a>
-              <a href="https://twitter.com/th3x_zohir" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Twitter">
-                <X size={18} />
-              </a>
+              <div className="contact-availability">
+                <span className="nav-status-dot" />
+                Available for new projects
+              </div>
+              <div className="contact-actions">
+                <MagneticButton href="mailto:Zohirrayhanweb@gmail.com" variant="primary">
+                  <Mail size={15} /> Send Email
+                </MagneticButton>
+                <MagneticButton href="https://github.com/Th3X-Zohir" variant="outline">
+                  <Github size={15} /> GitHub
+                </MagneticButton>
+              </div>
+              <div className="contact-social">
+                <a href="https://github.com/Th3X-Zohir" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="GitHub">
+                  <Github size={17} />
+                </a>
+                <a href="https://linkedin.com/in/th3x-zohir" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="LinkedIn">
+                  <Linkedin size={17} />
+                </a>
+                <a href="https://twitter.com/th3x_zohir" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Twitter">
+                  <X size={17} />
+                </a>
+              </div>
             </div>
           </Reveal>
         </div>
@@ -882,8 +799,10 @@ function Footer() {
 export default function Home() {
   return (
     <>
+      <ScrollProgress />
       <Navbar />
       <Hero />
+      <Marquee />
       <About />
       <Projects />
       <Skills />
