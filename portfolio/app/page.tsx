@@ -406,10 +406,128 @@ function About() {
 }
 
 // ============================================================
-// PROJECTS — Uniform Cards with CSS-generated visuals
+// GOVERNMENT CARD — Horizontal split, accent bar, impact stats
 // ============================================================
-function Projects() {
-  const projects = [
+function GovCard({ project }: { project: NonNullable<ReturnType<typeof getProjects>[0]> }) {
+  return (
+    <Reveal>
+      <a
+        href={project.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="gov-card"
+        style={{ "--proj-accent": project.accent } as React.CSSProperties}
+      >
+        {/* Left accent bar */}
+        <div className="gov-card-accent" />
+
+        {/* Visual panel */}
+        <div className="gov-card-visual">
+          <div className="gov-card-visual-inner">
+            <div className="gov-card-grid" />
+            <div className="gov-card-visual-content">
+              <div className="gov-card-icon-wrap">
+                <Building2 size={36} color={project.accent} />
+              </div>
+              <div className="gov-card-visual-label">National Platform</div>
+            </div>
+            <div className="gov-card-visual-glow" />
+          </div>
+        </div>
+
+        {/* Content panel */}
+        <div className="gov-card-content">
+          <div className="gov-card-top">
+            <div className="gov-card-badges">
+              <span className="gov-badge">
+                <span className="gov-badge-dot" />
+                {project.badge}
+              </span>
+              <span className="gov-card-status">{project.status}</span>
+            </div>
+            <h3 className="gov-card-title">{project.title}</h3>
+            <p className="gov-card-subtitle">{project.subtitle}</p>
+          </div>
+
+          <p className="gov-card-desc">{project.desc}</p>
+
+          {/* Impact stats */}
+          <div className="gov-card-stats">
+            <div className="gov-stat">
+              <span className="gov-stat-value">2</span>
+              <span className="gov-stat-label">Major Cities</span>
+            </div>
+            <div className="gov-stat-div" />
+            <div className="gov-stat">
+              <span className="gov-stat-value">e-Judiciary</span>
+              <span className="gov-stat-label">Bangladesh</span>
+            </div>
+            <div className="gov-stat-div" />
+            <div className="gov-stat">
+              <span className="gov-stat-value">Live</span>
+              <span className="gov-stat-label">2025</span>
+            </div>
+          </div>
+
+          <div className="gov-card-footer">
+            <div className="gov-card-tech">
+              {project.tech.map((t) => (
+                <span key={t} className="gov-tech-tag">{t}</span>
+              ))}
+            </div>
+            <span className="gov-card-link">
+              View Platform <ArrowRight size={14} />
+            </span>
+          </div>
+        </div>
+      </a>
+    </Reveal>
+  );
+}
+
+// ============================================================
+// REGULAR PROJECT CARD
+// ============================================================
+function RegularCard({ project }: { project: NonNullable<ReturnType<typeof getProjects>[0]> }) {
+  return (
+    <Reveal delay={(0) * 0.08}>
+      <a
+        href={project.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="proj-card"
+        style={{ "--proj-accent": project.accent } as React.CSSProperties}
+      >
+        <div className="proj-card-visual">
+          <ProjectVisual id={project.id} accent={project.accent} label={project.category} />
+        </div>
+        <div className="proj-card-body">
+          <div className="proj-card-meta">
+            <span className={`proj-badge ${project.badgeClass}`}>{project.badge}</span>
+            <span className="proj-status">{project.status}</span>
+          </div>
+          <div className="proj-card-title-row">
+            <h3>{project.title}</h3>
+            <ExternalLink size={14} className="proj-card-arrow" />
+          </div>
+          <p className="proj-card-subtitle">{project.subtitle}</p>
+          <p className="proj-card-desc">{project.desc}</p>
+          <div className="proj-card-tech">
+            {project.tech.map((t) => (
+              <span key={t} className="proj-tech-tag">{t}</span>
+            ))}
+          </div>
+        </div>
+      </a>
+    </Reveal>
+  );
+}
+
+// ============================================================
+// PROJECTS
+// ============================================================
+function getProjects() {
+  return [
     {
       id: "efamily",
       badge: "Government",
@@ -528,6 +646,12 @@ function Projects() {
       category: "HealthTech",
     },
   ];
+}
+
+function Projects() {
+  const projects = getProjects();
+  const govProject = projects[0];
+  const otherProjects = projects.slice(1);
 
   return (
     <section className="section" id="projects">
@@ -541,43 +665,13 @@ function Projects() {
           </p>
         </Reveal>
 
+        {/* Government card — horizontal split */}
+        <GovCard project={govProject} />
+
+        {/* Regular card grid */}
         <div className="projects-grid">
-          {projects.map((p, i) => (
-            <Reveal key={p.id} delay={(i % 3) * 0.08}>
-              <a
-                href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`proj-card ${i === 0 ? "proj-card--hero" : ""}`}
-                style={{ "--proj-accent": p.accent } as React.CSSProperties}
-              >
-                {/* Visual area */}
-                <div className="proj-card-visual">
-                  <ProjectVisual id={p.id} accent={p.accent} label={p.category} />
-                </div>
-
-                {/* Content area */}
-                <div className="proj-card-body">
-                  <div className="proj-card-meta">
-                    <span className={`proj-badge ${p.badgeClass}`}>{p.badge}</span>
-                    <span className="proj-status">{p.status}</span>
-                  </div>
-
-                  <div className="proj-card-title-row">
-                    <h3>{p.title}</h3>
-                    <ExternalLink size={14} className="proj-card-arrow" />
-                  </div>
-                  <p className="proj-card-subtitle">{p.subtitle}</p>
-                  <p className="proj-card-desc">{p.desc}</p>
-
-                  <div className="proj-card-tech">
-                    {p.tech.map((t) => (
-                      <span key={t} className="proj-tech-tag">{t}</span>
-                    ))}
-                  </div>
-                </div>
-              </a>
-            </Reveal>
+          {otherProjects.map((p, i) => (
+            <RegularCard key={p.id} project={p} />
           ))}
         </div>
       </div>
