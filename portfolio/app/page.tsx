@@ -1,23 +1,89 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { useState, useEffect, useRef, ReactNode } from "react";
+import { motion, useMotionValue, useSpring, useTransform, useInView } from "framer-motion";
 import {
   Github, Linkedin, Mail, ArrowRight, Menu, X,
-  Check, ExternalLink, Brain, Zap, Shield, Database, Radio,
-  ShoppingCart, Globe, Lock, Layers
+  ExternalLink, Brain, Zap, Shield, Database, Radio,
+  ShoppingCart, Globe, Users, Building2, HeartPulse, Link2
 } from "lucide-react";
 
-// ===== REVEAL =====
-function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+// ============================================================
+// MAGNETIC BUTTON — cursor-attracted, zero re-renders
+// ============================================================
+function MagneticButton({ children, className = "", href = "#", variant = "primary" }: {
+  children: ReactNode; className?: string; href?: string; variant?: "primary" | "outline";
+}) {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, { stiffness: 200, damping: 15 });
+  const springY = useSpring(y, { stiffness: 200, damping: 15 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = ref.current!.getBoundingClientRect();
+    const dx = e.clientX - (rect.left + rect.width / 2);
+    const dy = e.clientY - (rect.top + rect.height / 2);
+    x.set(dx * 0.25);
+    y.set(dy * 0.25);
+  };
+
+  return (
+    <motion.a
+      ref={ref}
+      href={href}
+      className={`btn ${variant === "primary" ? "btn-primary" : "btn-outline"} ${className}`}
+      style={{ x: springX, y: springY }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => { x.set(0); y.set(0); }}
+    >
+      {children}
+    </motion.a>
+  );
+}
+
+// ============================================================
+// TILT CARD — mouse-tracking 3D perspective
+// ============================================================
+function TiltCard({ children, className = "" }: { children: ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0.5);
+  const y = useMotionValue(0.5);
+  const rotateX = useTransform(y, [0, 1], [6, -6]);
+  const rotateY = useTransform(x, [0, 1], [-6, 6]);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    x.set((e.clientX - rect.left) / rect.width);
+    y.set((e.clientY - rect.top) / rect.height);
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      style={{ rotateX, rotateY, transformPerspective: 1000 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => { x.set(0.5); y.set(0.5); }}
+      transition={{ type: "spring", stiffness: 200, damping: 30 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ============================================================
+// REVEAL — scroll-triggered fade + slide
+// ============================================================
+function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.45, delay, ease: [0.25, 0.1, 0.25, 1] }}
+      initial={{ opacity: 0, y: 28 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
+      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
       className={className}
     >
       {children}
@@ -25,7 +91,45 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
   );
 }
 
-// ===== NAVBAR =====
+// ============================================================
+// STAGGER CONTAINER — blur + fade sequential reveal
+// ============================================================
+function StaggerContainer({ children, className = "" }: { children: ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px" });
+  return (
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={{
+        visible: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+        hidden: {},
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function StaggerItem({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
+        visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { type: "spring" as const, stiffness: 120, damping: 18 } },
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ============================================================
+// NAVBAR
+// ============================================================
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -39,21 +143,17 @@ function Navbar() {
 
   useEffect(() => {
     const sections = document.querySelectorAll("section[id]");
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActive(e.target.id);
-        });
-      },
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); }),
       { threshold: 0.3 }
     );
-    sections.forEach((s) => observer.observe(s));
-    return () => observer.disconnect();
+    sections.forEach((s) => obs.observe(s));
+    return () => obs.disconnect();
   }, []);
 
   const links = [
     { href: "#about", label: "About" },
-    { href: "#projects", label: "Work" },
+    { href: "#projects", label: "Projects" },
     { href: "#contact", label: "Contact" },
   ];
 
@@ -61,22 +161,19 @@ function Navbar() {
     <>
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
-          <a href="#" className="nav-logo">
-            Jihan<span className="dot">.</span>
-          </a>
+          <a href="#" className="nav-logo">Jihan<span className="dot">.</span></a>
           <ul className="nav-links">
             {links.map((l) => (
               <li key={l.href}>
-                <a href={l.href} className={active === l.href.slice(1) ? "active" : ""}>
-                  {l.label}
-                </a>
+                <a href={l.href} className={active === l.href.slice(1) ? "active" : ""}>{l.label}</a>
               </li>
             ))}
           </ul>
-          <div className="nav-available">
-            <span className="nav-available-dot" />
+          <div className="nav-status">
+            <span className="nav-status-dot" />
             Available
           </div>
+          <a href="#contact" className="nav-cta">Hire Me</a>
           <button className="nav-hamburger" onClick={() => setMobileOpen(true)} aria-label="Open menu">
             <Menu size={22} />
           </button>
@@ -90,20 +187,15 @@ function Navbar() {
           </button>
           {links.map((l, i) => (
             <motion.a
-              key={l.href}
-              href={l.href}
-              onClick={() => setMobileOpen(false)}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
+              key={l.href} href={l.href} onClick={() => setMobileOpen(false)}
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
               {l.label}
             </motion.a>
           ))}
-          <a
-            href="mailto:Zohirrayhanweb@gmail.com"
-            style={{ color: "var(--accent)", fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 700 }}
-          >
+          <a href="#contact" onClick={() => setMobileOpen(false)}
+            style={{ color: "var(--color-accent)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.2rem" }}>
             Hire Me
           </a>
         </div>
@@ -112,189 +204,290 @@ function Navbar() {
   );
 }
 
-// ===== HERO =====
+// ============================================================
+// HERO
+// ============================================================
 function Hero() {
   return (
     <section className="hero" id="hero">
+      <div className="hero-bg-img" />
+      <div className="hero-grid-overlay" />
+      <div className="hero-gradient-vignette" />
+
       <div className="container">
         <motion.div
           className="hero-content"
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="hero-eyebrow">AI-Native Full-Stack Developer</div>
 
-          <h1 className="hero-name">Jihan.</h1>
+          <motion.h1
+            className="hero-name"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Jihan<span className="dot">.</span>
+          </motion.h1>
 
-          <p className="hero-title">I build AI systems &amp; products that ship.</p>
+          <motion.p
+            className="hero-role"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            I build AI systems and digital products that run in production.
+          </motion.p>
 
-          <p className="hero-bio">
-            I'm a full-stack developer specializing in <strong>AI/LLM orchestration</strong>,{" "}
-            <strong>real-time platforms</strong>, and <strong>production SaaS products</strong>. Over 5 years,
-            6,700+ commits across 67 repositories — with 26+ collaborations on real-world projects.
-          </p>
+          <motion.p
+            className="hero-bio"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Full-stack developer specializing in <strong>AI/LLM orchestration</strong>,{" "}
+            <strong>government-scale platforms</strong>, and <strong>production SaaS products</strong>. Over
+            5 years, 6,700+ commits across 67 repositories — building systems that serve thousands of real users
+            in Bangladesh's courts, universities, and startups.
+          </motion.p>
 
-          <div className="hero-actions">
-            <a href="#projects" className="btn btn-primary">
-              View Work <ArrowRight size={16} />
-            </a>
-            <a href="#contact" className="btn btn-outline">
+          <motion.div
+            className="hero-actions"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <MagneticButton href="#projects" variant="primary">
+              View Projects <ArrowRight size={16} />
+            </MagneticButton>
+            <MagneticButton href="#contact" variant="outline">
               Get in Touch
-            </a>
-          </div>
+            </MagneticButton>
+          </motion.div>
 
-          <div className="hero-meta">
-            <div className="hero-stat">
-              <span className="hero-stat-value">6,700+</span>
-              <span className="hero-stat-label">Commits</span>
+          <motion.div
+            className="hero-metrics"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="hero-metric">
+              <span className="hero-metric-value"><span className="accent">6.7</span>K+</span>
+              <span className="hero-metric-label">Commits</span>
             </div>
-            <div className="hero-stat-divider" />
-            <div className="hero-stat">
-              <span className="hero-stat-value">67</span>
-              <span className="hero-stat-label">Repos</span>
+            <div className="hero-metric-divider" />
+            <div className="hero-metric">
+              <span className="hero-metric-value">67</span>
+              <span className="hero-metric-label">Repos</span>
             </div>
-            <div className="hero-stat-divider" />
-            <div className="hero-stat">
-              <span className="hero-stat-value">5+</span>
-              <span className="hero-stat-label">Years</span>
+            <div className="hero-metric-divider" />
+            <div className="hero-metric">
+              <span className="hero-metric-value">5+</span>
+              <span className="hero-metric-label">Years</span>
             </div>
-            <div className="hero-stat-divider" />
-            <div className="hero-stat">
-              <span className="hero-stat-value">26+</span>
-              <span className="hero-stat-label">Teams</span>
+            <div className="hero-metric-divider" />
+            <div className="hero-metric">
+              <span className="hero-metric-value">26+</span>
+              <span className="hero-metric-label">Projects</span>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
+      </div>
+
+      <div className="hero-scroll-hint">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M12 5v14M5 12l7 7 7-7" />
+        </svg>
+        Scroll
       </div>
     </section>
   );
 }
 
-// ===== ABOUT =====
+// ============================================================
+// ABOUT
+// ============================================================
 function About() {
+  const strengths = [
+    {
+      icon: <Brain size={13} />,
+      title: "AI-Native Architecture",
+      desc: "LLM orchestration, AI gateways, function calling, and vector databases at production scale.",
+    },
+    {
+      icon: <Building2 size={13} />,
+      title: "Government-Scale Platforms",
+      desc: "End-to-end digital systems for e-Judiciary — case filing, tracking, payments, and SMS/email workflows.",
+    },
+    {
+      icon: <Zap size={13} />,
+      title: "Full-Stack Delivery",
+      desc: "End-to-end product builds: Laravel backends, Next.js frontends, real-time features, and deployment.",
+    },
+    {
+      icon: <Shield size={13} />,
+      title: "Enterprise Security",
+      desc: "RBAC, JWT authentication, multi-role panels, and secure payment processing.",
+    },
+  ];
+
   return (
     <section className="section section-alt" id="about">
       <div className="container">
         <div className="about-grid">
           <Reveal className="about-bio">
             <div className="section-label">About</div>
-            <h2>More than code.<br />I ship products.</h2>
+            <h2>Production systems,<br />not pet projects.</h2>
             <p>
-              I'm a developer who goes beyond writing components. I design systems — from AI gateways
-              handling thousands of concurrent requests to multi-tenant SaaS platforms processing
-              real payments. Every project I take on gets the full treatment: architecture, execution, deployment.
+              I build software that people actually use. The <strong>E-Family Court platform</strong> handles
+              case filings for Bangladesh's judiciary across Dhaka and Chattogram. The{" "}
+              <strong>DIU Routine Scraper</strong> serves thousands of students daily.{" "}
+              <strong>Student Hub</strong> manages clubs, courses, and orientation for an entire university.
             </p>
             <p>
-              My work spans <strong>AI/LLM orchestration</strong>, <strong>real-time communication</strong>,
-              <strong>e-commerce platforms</strong>, and <strong>enterprise data automation</strong>.
-              I've collaborated with 26+ teams across startups, agencies, and AI companies — contributing
-              to systems that serve real users at scale.
+              My stack spans <strong>Python</strong> for AI and automation, <strong>TypeScript</strong> for
+              modern web, and <strong>Laravel</strong> for enterprise backends. I handle everything from
+              database design to deployment — and I write code that others can actually maintain.
             </p>
             <p>
-              Fluent across the stack: TypeScript, Python, Laravel, Next.js, PostgreSQL, and more.
-              When a project needs it, I pick up whatever technology is right for the job.
+              Available for freelance projects, long-term collaborations, and full-time roles.
+              If you need someone who ships, let's talk.
             </p>
           </Reveal>
 
-          <div className="about-strengths">
-            {[
-              {
-                icon: <Brain size={13} />,
-                title: "AI-Native Architecture",
-                desc: "LLM orchestration, AI gateways, function calling, and vector databases.",
-              },
-              {
-                icon: <Zap size={13} />,
-                title: "Full-Stack Delivery",
-                desc: "End-to-end product builds — frontend to backend to deployment.",
-              },
-              {
-                icon: <Shield size={13} />,
-                title: "Enterprise-Grade",
-                desc: "RBAC, multi-tenant systems, and secure authentication at scale.",
-              },
-              {
-                icon: <Database size={13} />,
-                title: "Data Engineering",
-                desc: "Scraping pipelines, browser automation, and multi-platform data flows.",
-              },
-            ].map((s, i) => (
-              <Reveal key={s.title} delay={i * 0.07}>
+          <StaggerContainer className="about-strengths">
+            {strengths.map((s) => (
+              <StaggerItem key={s.title}>
                 <div className="strength-item">
-                  <div className="strength-check">{s.icon}</div>
+                  <div className="strength-icon">{s.icon}</div>
                   <div className="strength-text">
                     <h4>{s.title}</h4>
                     <p>{s.desc}</p>
                   </div>
                 </div>
-              </Reveal>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
       </div>
     </section>
   );
 }
 
-// ===== PROJECTS =====
+// ============================================================
+// PROJECTS — Bento Grid
+// ============================================================
 function Projects() {
   const projects = [
+    {
+      id: "efamily",
+      badge: "Government",
+      badgeClass: "blue",
+      commits: "Active 2025",
+      title: "E-Family Court — National e-Judiciary Platform",
+      desc: "Contributed as full-stack developer to Bangladesh's end-to-end digital case filing system for Family Courts in Dhaka and Chattogram. Citizens file cases online, track progress, make payments, and receive SMS/email updates. Judges manage hearings and issue orders; lawyers submit documents; staff verify and generate reports.",
+      tech: ["Laravel", "PHP", "MSSQL", "JWT", "dompdf", "AJAX"],
+      url: "https://efamilycourt.judiciary.gov.bd/",
+      cover: "/assets/images/hero-bg.webp",
+      icon: <Building2 size={28} color="white" />,
+      label: "E-Judiciary Bangladesh",
+      size: "featured",
+    },
     {
       id: "rschat",
       badge: "Real-Time",
       commits: "1,874 commits",
-      title: "RSChat",
-      desc: "Production-grade real-time chat infrastructure handling thousands of concurrent connections. Built with WebSocket rooms, admin moderation panels, user management, and real-time state — TypeScript throughout for reliability.",
+      title: "RSChat — Real-Time Chat Platform",
+      desc: "Production-grade real-time chat infrastructure handling thousands of concurrent connections. WebSocket rooms, admin moderation dashboards, user panels, and real-time state management with TypeScript throughout.",
       tech: ["TypeScript", "WebSockets", "Socket.io", "Node.js"],
       url: "https://github.com/Th3X-Zohir/RSChat",
-      icon: <Radio size={26} color="white" />,
-      label: "Real-Time",
-    },
-    {
-      id: "ecomai",
-      badge: "SaaS",
-      commits: "96 commits",
-      title: "ecomai",
-      desc: "Shopify-alternative e-commerce platform with multi-tenant architecture, Stripe payments, subscription billing, and admin dashboards — one codebase, multiple stores.",
-      tech: ["Next.js", "TypeScript", "Stripe", "PostgreSQL"],
-      url: "https://github.com/Th3X-Zohir/ecomai",
-      icon: <ShoppingCart size={26} color="white" />,
-      label: "SaaS",
+      cover: "/assets/images/rschat-cover.webp",
+      icon: <Radio size={28} color="white" />,
+      label: "Real-Time Systems",
+      size: "wide",
     },
     {
       id: "falconai",
-      badge: "AI",
-      commits: "1,187 commits (collab)",
-      title: "FalconAI",
-      desc: "Core contributor to AI gateway infrastructure — multi-model orchestration, request routing, intelligent fallbacks, and enterprise AI pipelines for multiple LLM providers.",
-      tech: ["Python", "LLM", "AI Gateway", "LangChain"],
+      badge: "AI / LLM",
+      badgeClass: "green",
+      commits: "1,187 commits",
+      title: "FalconAI — AI Gateway & LLM Orchestration",
+      desc: "Core contributor to AI gateway infrastructure providing multi-model orchestration for enterprise clients. Built request routing, intelligent fallbacks, and multi-model pipelines across gpt-4, claude-3, and gemini.",
+      tech: ["Python", "LLM", "LangChain", "AI Gateway"],
       url: "https://github.com/zionmezba/FalconAI",
-      icon: <Brain size={26} color="white" />,
-      label: "AI",
-      collab: true,
+      cover: "/assets/images/falconai-cover.webp",
+      icon: <Brain size={28} color="white" />,
+      label: "AI Infrastructure",
+      size: "wide",
     },
     {
-      id: "rbac",
-      badge: "Enterprise",
-      commits: "54 commits",
-      title: "LaravelRBAC",
-      desc: "Enterprise-grade role-based access control with granular permissions, middleware architecture, and admin panel integration — built for production security.",
-      tech: ["Laravel", "TypeScript", "RBAC", "MySQL"],
-      url: "https://github.com/Th3X-Zohir/LaravelRBAC",
-      icon: <Shield size={26} color="white" />,
-      label: "Enterprise",
+      id: "routine",
+      badge: "Automation",
+      commits: "Active system",
+      title: "DIU Routine Scrapper — University Automation Platform",
+      desc: "Centralized automation platform for Daffodil International University. Scrapes official DIU routines, builds CSE databases, precomputes batch/teacher/room schedules. FCM push notifications, real-time booking, and a full Android app.",
+      tech: ["Python Flask", "SocketIO", "Firebase FCM", "Android"],
+      url: "https://routine.zohirrayhan.me/",
+      cover: "",
+      icon: <Database size={28} color="white" />,
+      label: "University Automation",
+      size: "standard",
     },
     {
-      id: "scraper",
-      badge: "Data",
-      commits: "100+ commits",
-      title: "Scraping Toolkit",
-      desc: "Multi-platform scraping suite covering LinkedIn, Twitter/X, and Telegram. Browser automation with proxy rotation, CAPTCHA handling, and scalable data pipelines.",
-      tech: ["Python", "Playwright", "Selenium", "Redis"],
-      url: "https://github.com/Th3X-Zohir/beastscrapper",
-      icon: <Globe size={26} color="white" />,
-      label: "Data",
+      id: "studenthub",
+      badge: "SaaS",
+      commits: "Active system",
+      title: "Student Hub — University Management System",
+      desc: "Official university management platform with orientation signup and digital food tokens, club management with payments and certificate generation, and dynamic course enrollment synced from GoEdu.",
+      tech: ["Laravel", "Blade", "MySQL", "JWT"],
+      url: "https://studentshub.daffodilvarsity.edu.bd/team",
+      cover: "",
+      icon: <Users size={28} color="white" />,
+      label: "University SaaS",
+      size: "standard",
+    },
+    {
+      id: "ecomai",
+      badge: "E-Commerce",
+      commits: "96 commits",
+      title: "ecomai — Multi-Tenant SaaS Platform",
+      desc: "Shopify-alternative e-commerce platform with multi-tenant architecture, Stripe payments, subscription billing, delivery tracking, and admin dashboards — one codebase, multiple stores.",
+      tech: ["Next.js", "TypeScript", "Stripe", "PostgreSQL"],
+      url: "https://github.com/Th3X-Zohir/ecomai",
+      cover: "/assets/images/ecomai-cover.webp",
+      icon: <ShoppingCart size={28} color="white" />,
+      label: "SaaS Platform",
+      size: "standard",
+    },
+    {
+      id: "linkpay",
+      badge: "FinTech",
+      badgeClass: "green",
+      commits: "56 commits",
+      title: "LINKPAY — Payment Integration Platform",
+      desc: "Payment gateway integration platform connecting multiple payment providers. Built with modern architecture for reliable, secure, and scalable transaction processing.",
+      tech: ["TypeScript", "Node.js", "Payment APIs"],
+      url: "https://github.com/Th3X-Zohir/LINKPAY",
+      cover: "",
+      icon: <Link2 size={28} color="white" />,
+      label: "FinTech",
+      size: "standard",
+    },
+    {
+      id: "bloodbridge",
+      badge: "Healthcare",
+      badgeClass: "blue",
+      commits: "Active system",
+      title: "Blood Bridge — Blood Donor Finder",
+      desc: "Real-time geolocation-based donor finder with interactive maps, blood group filtering by radius, live donor ETA tracking, and a community feed for urgent blood requests.",
+      tech: ["Python Flask", "Leaflet.js", "MySQL", "Geolocation API"],
+      url: "https://blood.shafinahmed.site/find-donor/dummy",
+      cover: "",
+      icon: <HeartPulse size={28} color="white" />,
+      label: "Healthcare Tech",
+      size: "standard",
     },
   ];
 
@@ -302,75 +495,57 @@ function Projects() {
     <section className="section" id="projects">
       <div className="container">
         <Reveal className="projects-header">
-          <div className="section-label">Featured Work</div>
-          <h2 className="section-heading">Projects that ship.</h2>
+          <div className="section-label">Featured Projects</div>
+          <h2 className="section-heading">Built for real people,<br />running in production.</h2>
           <p className="section-sub">
-            Not tutorials. Real production systems with real users, real commits, and measurable impact.
+            Not portfolio demos. These are live systems serving thousands of users across Bangladesh's
+            judiciary, universities, and startups.
           </p>
         </Reveal>
 
-        <div className="projects-grid">
-          {/* RSChat — Featured */}
-          <Reveal delay={0.05}>
-            <div className="project-card featured">
-              <div className="project-cover">
-                <div className="project-cover-bg pc-rschat" />
-                <div className="project-cover-content">
-                  <div className="project-cover-icon">{projects[0].icon}</div>
-                  <div className="project-cover-label">{projects[0].label}</div>
-                </div>
-              </div>
-              <div className="project-body">
-                <div className="project-meta">
-                  <span className="project-badge">{projects[0].badge}</span>
-                  <span className="project-commits">{projects[0].commits}</span>
-                </div>
-                <h3>{projects[0].title} — Real-Time Chat Platform</h3>
-                <p>{projects[0].desc}</p>
-                <div className="project-footer">
-                  <div className="project-tech">
-                    {projects[0].tech.map((t) => (
-                      <span key={t} className="tech-tag">{t}</span>
-                    ))}
+        <div className="bento-grid">
+          {projects.map((p, i) => (
+            <Reveal key={p.id} delay={i * 0.05}>
+              <TiltCard className={`bento-card ${p.size === "featured" ? "featured" : ""} ${p.size === "wide" ? "wide" : ""}`}>
+                <div className="bento-cover">
+                  {p.cover ? (
+                    <img src={p.cover} alt={p.title} className="bento-cover-img" loading="lazy" />
+                  ) : (
+                    <div style={{
+                      position: "absolute", inset: 0,
+                      background: "linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0A0A0A 100%)",
+                      display: "flex", alignItems: "center", justifyContent: "center"
+                    }}>
+                      <div style={{ opacity: 0.15 }}>{p.icon}</div>
+                    </div>
+                  )}
+                  <div className="bento-cover-overlay">
+                    <div className="bento-cover-content">
+                      <div style={{ marginBottom: 6 }}>{p.icon}</div>
+                      <div className="bento-cover-label">{p.label}</div>
+                    </div>
                   </div>
-                  <a href={projects[0].url} target="_blank" rel="noopener noreferrer" className="project-link">
-                    View on GitHub <ExternalLink size={14} />
-                  </a>
                 </div>
-              </div>
-            </div>
-          </Reveal>
 
-          {/* Other projects */}
-          {projects.slice(1).map((p, i) => (
-            <Reveal key={p.id} delay={i * 0.07 + 0.1}>
-              <div className="project-card">
-                <div className="project-cover">
-                  <div className={`project-cover-bg pc-${p.id}`} />
-                  <div className="project-cover-content">
-                    <div className="project-cover-icon">{p.icon}</div>
-                    <div className="project-cover-label">{p.label}</div>
-                  </div>
-                </div>
-                <div className="project-body">
-                  <div className="project-meta">
-                    <span className={`project-badge ${p.collab ? "collab" : ""}`}>{p.badge}</span>
-                    <span className="project-commits">{p.commits}</span>
+                <div className="bento-body">
+                  <div className="bento-meta">
+                    <span className={`bento-badge ${p.badgeClass || ""}`}>{p.badge}</span>
+                    <span className="bento-commits">{p.commits}</span>
                   </div>
                   <h3>{p.title}</h3>
                   <p>{p.desc}</p>
-                  <div className="project-footer">
-                    <div className="project-tech">
+                  <div className="bento-footer">
+                    <div className="bento-tech">
                       {p.tech.map((t) => (
                         <span key={t} className="tech-tag">{t}</span>
                       ))}
                     </div>
-                    <a href={p.url} target="_blank" rel="noopener noreferrer" className="project-link">
-                      GitHub <ExternalLink size={13} />
+                    <a href={p.url} target="_blank" rel="noopener noreferrer" className="bento-link">
+                      View <ExternalLink size={14} />
                     </a>
                   </div>
                 </div>
-              </div>
+              </TiltCard>
             </Reveal>
           ))}
         </div>
@@ -379,24 +554,26 @@ function Projects() {
   );
 }
 
-// ===== SKILLS =====
+// ============================================================
+// SKILLS / STACK
+// ============================================================
 function Skills() {
   const categories = [
     {
       title: "Languages",
-      tags: ["TypeScript", "Python", "PHP", "SQL", "Bash", "HTML/CSS", "JavaScript"],
+      tags: ["TypeScript", "Python", "PHP", "SQL", "Java", "Bash", "HTML/CSS", "JavaScript"],
     },
     {
-      title: "Frameworks & Runtime",
-      tags: ["Next.js", "React", "Laravel", "Node.js", "Express", "Socket.io", "FastAPI"],
+      title: "Frameworks",
+      tags: ["Laravel", "Next.js", "React", "Node.js", "Flask", "Socket.io", "FastAPI"],
     },
     {
       title: "AI & Data",
-      tags: ["OpenAI API", "LangChain", "Vector DBs", "Playwright", "Selenium", "Prisma", "PostgreSQL"],
+      tags: ["OpenAI API", "LangChain", "Vector DBs", "Playwright", "Selenium", "Puppeteer", "Pandas"],
     },
     {
       title: "Infrastructure",
-      tags: ["Git", "GitHub", "Docker", "Redis", "Nginx", "AWS", "Vercel"],
+      tags: ["PostgreSQL", "MySQL", "MSSQL", "Redis", "Firebase", "Docker", "AWS"],
     },
   ];
 
@@ -407,51 +584,53 @@ function Skills() {
           <div className="section-label">Stack</div>
           <h2 className="section-heading">Tools of the trade.</h2>
           <p className="section-sub">
-            Technologies I work with day-to-day across AI, full-stack, and infrastructure.
+            The full stack, from AI models to production databases.
           </p>
         </Reveal>
 
-        <div className="skills-grid">
-          {categories.map((cat, i) => (
-            <Reveal key={cat.title} delay={i * 0.07}>
-              <div className="skill-category">
+        <StaggerContainer className="stack-grid">
+          {categories.map((cat) => (
+            <StaggerItem key={cat.title}>
+              <div className="stack-category">
                 <h4>{cat.title}</h4>
-                <div className="skill-tags">
+                <div className="stack-tags">
                   {cat.tags.map((tag) => (
-                    <span key={tag} className="skill-tag">{tag}</span>
+                    <span key={tag} className="stack-tag">{tag}</span>
                   ))}
                 </div>
               </div>
-            </Reveal>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );
 }
 
-// ===== EXPERIENCE =====
+// ============================================================
+// EXPERIENCE / TIMELINE
+// ============================================================
 function Experience() {
   const items = [
     {
-      period: "2020 — Present",
-      title: "AI-Native Full-Stack Development",
-      subtitle: "Independent / Freelance",
-      desc: "Building production AI systems, SaaS platforms, and real-time applications. Collaborated with multiple startups and agencies on AI integration, e-commerce, and data engineering. Active across 67 repositories with 6,700+ commits.",
+      period: "2025 — Present",
+      title: "E-Family Court Platform",
+      subtitle: "Full-Stack Developer — Government Project",
+      desc: "Building Bangladesh's national e-filing platform for Family Courts. Handles case submission, payment processing, SMS/email notifications, judge dashboards, and lawyer portals. Microsoft SQL Server backend with Laravel, JWT auth, and dompdf for document generation.",
       current: true,
     },
     {
-      period: "Core Collaborations",
-      title: "FalconAI & Jury AI",
-      subtitle: "Collaborator / Contributor",
-      desc: "Core contributor to AI gateway infrastructure (FalconAI, 1,187 commits) and legal AI platform (Jury AI). Built multi-model orchestration pipelines and AI processing workflows for enterprise clients.",
+      period: "2020 — Present",
+      title: "Independent Development",
+      subtitle: "Full-Stack Developer — Freelance",
+      desc: "Building and maintaining production systems across universities, fintech, and AI. RSChat (1,874 commits), DIU Routine Platform (daily active users), Student Hub, Blood Bridge, LINKPAY, and multiple AI gateway contributions. 6,700+ commits across 67 repositories.",
       current: false,
     },
     {
-      period: "Daffodil International University",
-      title: "Campus Tools & Automation",
-      subtitle: "Student Developer",
-      desc: "Built campus-wide tools for DIU — class routine scrapers, notice boards, lab management systems, and campus scheduling apps. Real experience building software for real users.",
+      period: "2020 — 2024",
+      title: "University Tools & Automation",
+      subtitle: "Student Developer — DIU",
+      desc: "Built the DIU Routine Scraper (Flask, SocketIO, FCM, Android), Student Hub (Laravel), and various campus tools. Served thousands of students and faculty daily with production-grade automation.",
       current: false,
     },
   ];
@@ -461,15 +640,15 @@ function Experience() {
       <div className="container">
         <Reveal>
           <div className="section-label">Experience</div>
-          <h2 className="section-heading">Where I&apos;ve worked.</h2>
+          <h2 className="section-heading">Where I've worked.</h2>
           <p className="section-sub">
-            A track record of building real systems, not just coursework.
+            A track record of production systems, not just coursework.
           </p>
         </Reveal>
 
-        <div className="timeline">
-          {items.map((item, i) => (
-            <Reveal key={item.title} delay={i * 0.08}>
+        <StaggerContainer className="timeline">
+          {items.map((item) => (
+            <StaggerItem key={item.title}>
               <div className="timeline-item">
                 <div className="timeline-marker">
                   <div className="timeline-marker-dot" />
@@ -481,15 +660,17 @@ function Experience() {
                   <p>{item.desc}</p>
                 </div>
               </div>
-            </Reveal>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );
 }
 
-// ===== CONTACT =====
+// ============================================================
+// CONTACT
+// ============================================================
 function Contact() {
   return (
     <section className="contact" id="contact">
@@ -500,32 +681,32 @@ function Contact() {
           </Reveal>
           <Reveal delay={0.08}>
             <h2 className="contact-heading">
-              Let&apos;s build<br />something great.
+              Let's build<br />something that ships.
             </h2>
           </Reveal>
           <Reveal delay={0.15}>
             <p className="contact-sub">
-              Available for new projects. Whether it&apos;s an AI system, a SaaS product,
-              or a real-time platform — let&apos;s talk.
+              Available for freelance projects, full-time roles, and long-term collaborations.
+              I work across the stack — AI systems, SaaS platforms, or anything that needs shipping.
             </p>
           </Reveal>
           <Reveal delay={0.2}>
-            <a href="mailto:Zohirrayhanweb@gmail.com" className="contact-email-link">
+            <a href="mailto:Zohirrayhanweb@gmail.com" className="contact-email">
               Zohirrayhanweb@gmail.com
             </a>
             <div className="contact-availability">
-              <span className="nav-available-dot" />
+              <span className="nav-status-dot" />
               Available for new projects
             </div>
           </Reveal>
           <Reveal delay={0.25}>
             <div className="contact-actions">
-              <a href="mailto:Zohirrayhanweb@gmail.com" className="btn btn-primary">
+              <MagneticButton href="mailto:Zohirrayhanweb@gmail.com" variant="primary">
                 <Mail size={16} /> Send Email
-              </a>
-              <a href="https://github.com/Th3X-Zohir" target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+              </MagneticButton>
+              <MagneticButton href="https://github.com/Th3X-Zohir" variant="outline">
                 <Github size={16} /> GitHub
-              </a>
+              </MagneticButton>
             </div>
           </Reveal>
           <Reveal delay={0.3}>
@@ -547,7 +728,9 @@ function Contact() {
   );
 }
 
-// ===== FOOTER =====
+// ============================================================
+// FOOTER
+// ============================================================
 function Footer() {
   return (
     <footer className="footer">
@@ -568,7 +751,9 @@ function Footer() {
   );
 }
 
-// ===== MAIN =====
+// ============================================================
+// MAIN PAGE
+// ============================================================
 export default function Home() {
   return (
     <>
