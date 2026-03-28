@@ -378,7 +378,7 @@
 
 .bento-grid {
   display: grid; grid-template-columns: repeat(12, 1fr);
-  gap: 16px; align-items: stretch;
+  gap: 20px; align-items: stretch;
 }
 .bento-featured { grid-column: 1 / -1; }
 .bento-wide { grid-column: span 8; }
@@ -387,18 +387,20 @@
 .bento-double { grid-column: span 8; }
 
 .bento-card {
-  display: flex; flex-direction: column;
   background: var(--color-surface); border: 1px solid var(--color-border);
   border-radius: 20px; overflow: hidden;
-  text-decoration: none; color: inherit;
   position: relative; transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
-  cursor: pointer;
 }
 .bento-card:hover {
   border-color: color-mix(in srgb, var(--proj-accent) 50%, transparent);
   box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 32px color-mix(in srgb, var(--proj-accent) 12%, transparent);
   transform: translateY(-4px);
 }
+.bento-link {
+  display: flex; flex-direction: column;
+  text-decoration: none; color: inherit; height: 100%;
+}
+.bento-card:hover .bento-link { text-decoration: none; }
 
 .bento-visual {
   position: relative; flex-shrink: 0; overflow: hidden;
@@ -431,6 +433,23 @@
   color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.15em;
 }
 .bento-visual-glow { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.bento-visual-overlay {
+  position: absolute; inset: 0; z-index: 3; opacity: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 50%);
+  transition: opacity 0.3s;
+}
+.bento-card:hover .bento-visual-overlay { opacity: 1; }
+
+.bento-visual-icon {
+  width: 64px; height: 64px; background: rgba(9,9,11,0.7);
+  border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;
+  transition: transform 0.3s, border-color 0.3s;
+}
+.bento-card:hover .bento-visual-icon {
+  transform: scale(1.08);
+  border-color: color-mix(in srgb, var(--proj-accent) 40%, transparent);
+}
 
 .bento-body {
   display: flex; flex-direction: column; flex: 1;

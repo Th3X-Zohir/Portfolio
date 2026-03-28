@@ -204,6 +204,7 @@ function BentoVisual({ id, accent }: { id: string; accent: string }) {
     <div className={`bento-visual vis--${id}`}>
       <div className="bento-visual-grid" />
       <div className="bento-visual-glow" />
+      <div className="bento-visual-overlay" />
       <div className="bento-visual-center">
         <div className="bento-visual-icon">{icons[id]}</div>
         <div className="bento-visual-label">{labels[id]}</div>
@@ -213,45 +214,51 @@ function BentoVisual({ id, accent }: { id: string; accent: string }) {
 }
 
 // ============================================================
-// BENTO CARD
+// BENTO CARD — self-contained reveal + grid positioning
 // ============================================================
 function BentoCard({
-  id, title, subtitle, desc, tech, url, accent, badge, badgeClass, status, size
+  id, title, subtitle, desc, tech, url, accent, badge, badgeClass, status, size, index = 0
 }: {
   id: string; title: string; subtitle: string; desc: string; tech: string[];
-  url: string; accent: string; badge: string; badgeClass?: string; status: string; size: string;
+  url: string; accent: string; badge: string; badgeClass?: string; status: string; size: string; index?: number;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px" });
   const isLive = status === "Live System" || status === "Daily Active" || status === "Active development";
+  const staggerDelay = Math.min(index * 0.06, 0.4);
 
   return (
-    <motion.a
-      href={url} target="_blank" rel="noopener noreferrer"
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 36 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
+      transition={{ duration: 0.6, delay: staggerDelay, ease: [0.16, 1, 0.3, 1] }}
       className={`bento-card ${size}`}
       style={{ "--proj-accent": accent } as React.CSSProperties}
-      whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
-      <BentoVisual id={id} accent={accent} />
-      <div className="bento-body">
-        <div className="bento-meta">
-          <span className={`bento-badge ${badgeClass || ""}`}>{badge}</span>
-          {isLive ? (
-            <span className="live-indicator"><span className="live-dot" />{status}</span>
-          ) : (
-            <span className="bento-status">{status}</span>
-          )}
+      <a href={url} target="_blank" rel="noopener noreferrer" className="bento-link">
+        <BentoVisual id={id} accent={accent} />
+        <div className="bento-body">
+          <div className="bento-meta">
+            <span className={`bento-badge ${badgeClass || ""}`}>{badge}</span>
+            {isLive ? (
+              <span className="live-indicator"><span className="live-dot" />{status}</span>
+            ) : (
+              <span className="bento-status">{status}</span>
+            )}
+          </div>
+          <div className="bento-title-row">
+            <h3>{title}</h3>
+            <ExternalLink size={14} className="bento-arrow" />
+          </div>
+          <p className="bento-subtitle">{subtitle}</p>
+          <p className="bento-desc">{desc}</p>
+          <div className="bento-tech">
+            {tech.map((t) => <span key={t} className="tech-tag">{t}</span>)}
+          </div>
         </div>
-        <div className="bento-title-row">
-          <h3>{title}</h3>
-          <ExternalLink size={14} className="bento-arrow" />
-        </div>
-        <p className="bento-subtitle">{subtitle}</p>
-        <p className="bento-desc">{desc}</p>
-        <div className="bento-tech">
-          {tech.map((t) => <span key={t} className="tech-tag">{t}</span>)}
-        </div>
-      </div>
-    </motion.a>
+      </a>
+    </motion.div>
   );
 }
 
@@ -591,9 +598,7 @@ function Projects() {
 
         <div className="bento-grid">
           {projects.map((p, i) => (
-            <Reveal key={p.id} delay={(i % 3) * 0.07}>
-              <BentoCard {...p} />
-            </Reveal>
+            <BentoCard key={p.id} {...p} index={i} />
           ))}
         </div>
       </div>
