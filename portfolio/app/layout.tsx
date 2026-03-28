@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Jihan — AI-Native Full-Stack Developer",
+  title: "Zohir Rayhan — AI-Native Full-Stack Developer",
   description:
     "Full-Stack Developer specializing in AI/LLM systems, real-time platforms, and production SaaS products. 6,700+ commits across 67 repositories. Built systems for e-Judiciary Bangladesh, Daffodil International University, and multiple AI companies.",
-  keywords: ["AI developer", "full-stack developer", "TypeScript", "Python", "LLM", "SaaS", "Laravel", "Next.js", "Jihan"],
-  authors: [{ name: "Jihan" }],
+  keywords: ["AI developer", "full-stack developer", "TypeScript", "Python", "LLM", "SaaS", "Laravel", "Next.js", "Zohir Rayhan"],
+  authors: [{ name: "Zohir Rayhan" }],
   openGraph: {
-    title: "Jihan — AI-Native Full-Stack Developer",
+    title: "Zohir Rayhan — AI-Native Full-Stack Developer",
     description: "Full-Stack Developer specializing in AI systems, real-time platforms, and SaaS products.",
     type: "website",
   },

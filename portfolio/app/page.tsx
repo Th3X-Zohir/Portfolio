@@ -5,7 +5,7 @@ import { motion, useMotionValue, useSpring, useTransform, useInView } from "fram
 import {
   Github, Linkedin, Mail, ArrowRight, Menu, X,
   ExternalLink, Brain, Zap, Shield, Database, Radio,
-  ShoppingCart, Globe, Users, Building2, HeartPulse, Link2
+  ShoppingCart, Globe, Users, Building2, HeartPulse, Link2, Cpu
 } from "lucide-react";
 
 // ============================================================
@@ -128,6 +128,35 @@ function StaggerItem({ children, className = "" }: { children: ReactNode; classN
 }
 
 // ============================================================
+// PROJECT CARD — uniform height, CSS-generated visual
+// ============================================================
+function ProjectVisual({ id, accent, label }: { id: string; accent: string; label: string }) {
+  const icons: Record<string, ReactNode> = {
+    efamily: <Building2 size={32} color={accent} />,
+    rschat: <Radio size={32} color={accent} />,
+    falconai: <Brain size={32} color={accent} />,
+    neuralops: <Cpu size={32} color={accent} />,
+    routine: <Database size={32} color={accent} />,
+    studenthub: <Users size={32} color={accent} />,
+    ecomai: <ShoppingCart size={32} color={accent} />,
+    linkpay: <Link2 size={32} color={accent} />,
+    bloodbridge: <HeartPulse size={32} color={accent} />,
+  };
+
+  return (
+    <div className={`proj-visual proj-visual--${id}`}>
+      <div className="proj-visual-grid" />
+      <div className="proj-visual-center">
+        <div className="proj-visual-icon">{icons[id]}</div>
+        <div className="proj-visual-label">{label}</div>
+      </div>
+      {/* Ambient glow */}
+      <div className="proj-visual-glow" style={{ background: `radial-gradient(ellipse 60% 60% at 50% 50%, ${accent}22 0%, transparent 70%)` }} />
+    </div>
+  );
+}
+
+// ============================================================
 // NAVBAR
 // ============================================================
 function Navbar() {
@@ -161,7 +190,7 @@ function Navbar() {
     <>
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
-          <a href="#" className="nav-logo">Jihan<span className="dot">.</span></a>
+          <a href="#" className="nav-logo">Zohir<span className="dot">.</span></a>
           <ul className="nav-links">
             {links.map((l) => (
               <li key={l.href}>
@@ -229,7 +258,7 @@ function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
-            Jihan<span className="dot">.</span>
+            Zohir Rayhan<span className="dot">.</span>
           </motion.h1>
 
           <motion.p
@@ -289,7 +318,7 @@ function Hero() {
             </div>
             <div className="hero-metric-divider" />
             <div className="hero-metric">
-              <span className="hero-metric-value">26+</span>
+              <span className="hero-metric-value">27+</span>
               <span className="hero-metric-label">Projects</span>
             </div>
           </motion.div>
@@ -377,7 +406,7 @@ function About() {
 }
 
 // ============================================================
-// PROJECTS — Bento Grid
+// PROJECTS — Uniform Cards with CSS-generated visuals
 // ============================================================
 function Projects() {
   const projects = [
@@ -385,109 +414,118 @@ function Projects() {
       id: "efamily",
       badge: "Government",
       badgeClass: "blue",
-      commits: "Active 2025",
-      title: "E-Family Court — National e-Judiciary Platform",
-      desc: "Contributed as full-stack developer to Bangladesh's end-to-end digital case filing system for Family Courts in Dhaka and Chattogram. Citizens file cases online, track progress, make payments, and receive SMS/email updates. Judges manage hearings and issue orders; lawyers submit documents; staff verify and generate reports.",
-      tech: ["Laravel", "PHP", "MSSQL", "JWT", "dompdf", "AJAX"],
+      status: "Live System",
+      title: "E-Family Court",
+      subtitle: "National e-Judiciary Platform",
+      desc: "Full-stack developer on Bangladesh's end-to-end digital case filing system for Family Courts. Citizens file cases, track progress, and make payments online. Judges manage hearings; lawyers submit documents.",
+      tech: ["Laravel", "PHP", "MSSQL", "JWT", "dompdf"],
       url: "https://efamilycourt.judiciary.gov.bd/",
-      cover: "/assets/images/hero-bg.webp",
-      icon: <Building2 size={28} color="white" />,
-      label: "E-Judiciary Bangladesh",
-      size: "featured",
+      accent: "#3B82F6",
+      category: "Legal Tech",
     },
     {
       id: "rschat",
       badge: "Real-Time",
-      commits: "1,874 commits",
-      title: "RSChat — Real-Time Chat Platform",
-      desc: "Production-grade real-time chat infrastructure handling thousands of concurrent connections. WebSocket rooms, admin moderation dashboards, user panels, and real-time state management with TypeScript throughout.",
-      tech: ["TypeScript", "WebSockets", "Socket.io", "Node.js"],
+      badgeClass: "orange",
+      status: "1,874 commits",
+      title: "RSChat",
+      subtitle: "Real-Time Chat Platform",
+      desc: "Production-grade real-time chat infrastructure handling thousands of concurrent WebSocket connections. Admin moderation dashboards, user panels, and full TypeScript throughout.",
+      tech: ["TypeScript", "Socket.io", "Node.js", "WebSockets"],
       url: "https://github.com/Th3X-Zohir/RSChat",
-      cover: "/assets/images/rschat-cover.webp",
-      icon: <Radio size={28} color="white" />,
-      label: "Real-Time Systems",
-      size: "wide",
+      accent: "#F97316",
+      category: "Infrastructure",
     },
     {
       id: "falconai",
       badge: "AI / LLM",
       badgeClass: "green",
-      commits: "1,187 commits",
-      title: "FalconAI — AI Gateway & LLM Orchestration",
-      desc: "Core contributor to AI gateway infrastructure providing multi-model orchestration for enterprise clients. Built request routing, intelligent fallbacks, and multi-model pipelines across gpt-4, claude-3, and gemini.",
+      status: "1,187 commits",
+      title: "FalconAI",
+      subtitle: "AI Gateway & LLM Orchestration",
+      desc: "Core contributor to AI gateway infrastructure providing multi-model orchestration for enterprise clients. Built intelligent routing, fallbacks, and multi-model pipelines.",
       tech: ["Python", "LLM", "LangChain", "AI Gateway"],
       url: "https://github.com/zionmezba/FalconAI",
-      cover: "/assets/images/falconai-cover.webp",
-      icon: <Brain size={28} color="white" />,
-      label: "AI Infrastructure",
-      size: "wide",
+      accent: "#A855F7",
+      category: "AI Infrastructure",
+    },
+    {
+      id: "neuralops",
+      badge: "AI / Ops",
+      badgeClass: "green",
+      status: "Active development",
+      title: "Neural Ops",
+      subtitle: "AI Gateway Admin Control Plane",
+      desc: "Multi-provider AI gateway with a live admin dashboard for monitoring, rate limiting, API key management, usage analytics, provider health tracking, and one-click operational controls.",
+      tech: ["Node.js", "TypeScript", "Fastify", "React", "Recharts"],
+      url: "https://github.com/Th3X-Zohir/neural-ops-ai-gateway",
+      accent: "#22C55E",
+      category: "AI Operations",
     },
     {
       id: "routine",
       badge: "Automation",
-      commits: "Active system",
-      title: "DIU Routine Scrapper — University Automation Platform",
-      desc: "Centralized automation platform for Daffodil International University. Scrapes official DIU routines, builds CSE databases, precomputes batch/teacher/room schedules. FCM push notifications, real-time booking, and a full Android app.",
+      badgeClass: "orange",
+      status: "Daily Active",
+      title: "DIU Routine Scrapper",
+      subtitle: "University Automation Platform",
+      desc: "Centralized automation platform for Daffodil International University. Scrapes official routines, builds CSE databases, precomputes schedules. FCM push notifications and full Android app.",
       tech: ["Python Flask", "SocketIO", "Firebase FCM", "Android"],
       url: "https://routine.zohirrayhan.me/",
-      cover: "",
-      icon: <Database size={28} color="white" />,
-      label: "University Automation",
-      size: "standard",
+      accent: "#F97316",
+      category: "EdTech",
     },
     {
       id: "studenthub",
       badge: "SaaS",
-      commits: "Active system",
-      title: "Student Hub — University Management System",
-      desc: "Official university management platform with orientation signup and digital food tokens, club management with payments and certificate generation, and dynamic course enrollment synced from GoEdu.",
+      badgeClass: "",
+      status: "Live System",
+      title: "Student Hub",
+      subtitle: "University Management System",
+      desc: "Official university management platform with orientation signup, digital food tokens, club management with payments and certificate generation, and dynamic course enrollment.",
       tech: ["Laravel", "Blade", "MySQL", "JWT"],
       url: "https://studentshub.daffodilvarsity.edu.bd/team",
-      cover: "",
-      icon: <Users size={28} color="white" />,
-      label: "University SaaS",
-      size: "standard",
+      accent: "#3B82F6",
+      category: "EdTech",
     },
     {
       id: "ecomai",
       badge: "E-Commerce",
-      commits: "96 commits",
-      title: "ecomai — Multi-Tenant SaaS Platform",
+      badgeClass: "",
+      status: "96 commits",
+      title: "ecomai",
+      subtitle: "Multi-Tenant SaaS Platform",
       desc: "Shopify-alternative e-commerce platform with multi-tenant architecture, Stripe payments, subscription billing, delivery tracking, and admin dashboards — one codebase, multiple stores.",
       tech: ["Next.js", "TypeScript", "Stripe", "PostgreSQL"],
       url: "https://github.com/Th3X-Zohir/ecomai",
-      cover: "/assets/images/ecomai-cover.webp",
-      icon: <ShoppingCart size={28} color="white" />,
-      label: "SaaS Platform",
-      size: "standard",
+      accent: "#F97316",
+      category: "SaaS",
     },
     {
       id: "linkpay",
       badge: "FinTech",
       badgeClass: "green",
-      commits: "56 commits",
-      title: "LINKPAY — Payment Integration Platform",
-      desc: "Payment gateway integration platform connecting multiple payment providers. Built with modern architecture for reliable, secure, and scalable transaction processing.",
+      status: "56 commits",
+      title: "LINKPAY",
+      subtitle: "Payment Integration Platform",
+      desc: "Payment gateway integration platform connecting multiple payment providers with modern architecture for reliable, secure, and scalable transaction processing.",
       tech: ["TypeScript", "Node.js", "Payment APIs"],
       url: "https://github.com/Th3X-Zohir/LINKPAY",
-      cover: "",
-      icon: <Link2 size={28} color="white" />,
-      label: "FinTech",
-      size: "standard",
+      accent: "#22C55E",
+      category: "FinTech",
     },
     {
       id: "bloodbridge",
       badge: "Healthcare",
       badgeClass: "blue",
-      commits: "Active system",
-      title: "Blood Bridge — Blood Donor Finder",
+      status: "Live System",
+      title: "Blood Bridge",
+      subtitle: "Blood Donor Finder",
       desc: "Real-time geolocation-based donor finder with interactive maps, blood group filtering by radius, live donor ETA tracking, and a community feed for urgent blood requests.",
-      tech: ["Python Flask", "Leaflet.js", "MySQL", "Geolocation API"],
+      tech: ["Python Flask", "Leaflet.js", "MySQL", "Geolocation"],
       url: "https://blood.shafinahmed.site/find-donor/dummy",
-      cover: "",
-      icon: <HeartPulse size={28} color="white" />,
-      label: "Healthcare Tech",
-      size: "standard",
+      accent: "#EF4444",
+      category: "HealthTech",
     },
   ];
 
@@ -503,49 +541,42 @@ function Projects() {
           </p>
         </Reveal>
 
-        <div className="bento-grid">
+        <div className="projects-grid">
           {projects.map((p, i) => (
-            <Reveal key={p.id} delay={i * 0.05}>
-              <TiltCard className={`bento-card ${p.size === "featured" ? "featured" : ""} ${p.size === "wide" ? "wide" : ""}`}>
-                <div className="bento-cover">
-                  {p.cover ? (
-                    <img src={p.cover} alt={p.title} className="bento-cover-img" loading="lazy" />
-                  ) : (
-                    <div style={{
-                      position: "absolute", inset: 0,
-                      background: "linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0A0A0A 100%)",
-                      display: "flex", alignItems: "center", justifyContent: "center"
-                    }}>
-                      <div style={{ opacity: 0.15 }}>{p.icon}</div>
-                    </div>
-                  )}
-                  <div className="bento-cover-overlay">
-                    <div className="bento-cover-content">
-                      <div style={{ marginBottom: 6 }}>{p.icon}</div>
-                      <div className="bento-cover-label">{p.label}</div>
-                    </div>
-                  </div>
+            <Reveal key={p.id} delay={(i % 3) * 0.08}>
+              <a
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`proj-card ${i === 0 ? "proj-card--hero" : ""}`}
+                style={{ "--proj-accent": p.accent } as React.CSSProperties}
+              >
+                {/* Visual area */}
+                <div className="proj-card-visual">
+                  <ProjectVisual id={p.id} accent={p.accent} label={p.category} />
                 </div>
 
-                <div className="bento-body">
-                  <div className="bento-meta">
-                    <span className={`bento-badge ${p.badgeClass || ""}`}>{p.badge}</span>
-                    <span className="bento-commits">{p.commits}</span>
+                {/* Content area */}
+                <div className="proj-card-body">
+                  <div className="proj-card-meta">
+                    <span className={`proj-badge ${p.badgeClass}`}>{p.badge}</span>
+                    <span className="proj-status">{p.status}</span>
                   </div>
-                  <h3>{p.title}</h3>
-                  <p>{p.desc}</p>
-                  <div className="bento-footer">
-                    <div className="bento-tech">
-                      {p.tech.map((t) => (
-                        <span key={t} className="tech-tag">{t}</span>
-                      ))}
-                    </div>
-                    <a href={p.url} target="_blank" rel="noopener noreferrer" className="bento-link">
-                      View <ExternalLink size={14} />
-                    </a>
+
+                  <div className="proj-card-title-row">
+                    <h3>{p.title}</h3>
+                    <ExternalLink size={14} className="proj-card-arrow" />
+                  </div>
+                  <p className="proj-card-subtitle">{p.subtitle}</p>
+                  <p className="proj-card-desc">{p.desc}</p>
+
+                  <div className="proj-card-tech">
+                    {p.tech.map((t) => (
+                      <span key={t} className="proj-tech-tag">{t}</span>
+                    ))}
                   </div>
                 </div>
-              </TiltCard>
+              </a>
             </Reveal>
           ))}
         </div>
@@ -737,7 +768,7 @@ function Footer() {
       <div className="container footer-inner">
         <div className="footer-left">
           <p>
-            Built by <a href="https://github.com/Th3X-Zohir" target="_blank" rel="noopener noreferrer">Jihan</a>
+            Built by <a href="https://github.com/Th3X-Zohir" target="_blank" rel="noopener noreferrer">Zohir Rayhan</a>
             &nbsp;&middot;&nbsp; {new Date().getFullYear()}
           </p>
         </div>
