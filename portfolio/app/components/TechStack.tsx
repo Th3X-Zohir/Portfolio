@@ -1,10 +1,9 @@
 "use client";
 
-import { useRef, useMemo, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment, Float } from "@react-three/drei";
-import { Physics, RigidBody, BallCollider } from "@react-three/rapier";
+import { Float } from "@react-three/drei";
 import "./TechStack.css";
 
 const techItems = [
@@ -26,9 +25,23 @@ const techItems = [
   { name: "MySQL", color: "#4479A1" },
 ];
 
-function TechSphere({ color, position }: { color: string; position: [number, number, number] }) {
-  const meshRef = useRef<THREE.Mesh>(null);
+// Pre-compute sphere data with stable random positions
+const sphereData = Array.from({ length: 30 }, (_, i) => ({
+  color: techItems[i % techItems.length].color,
+  position: [
+    (Math.random() - 0.5) * 14,
+    (Math.random() - 0.5) * 8,
+    (Math.random() - 0.5) * 6,
+  ] as [number, number, number],
+  scale: 0.25 + Math.random() * 0.45,
+  rotSpeed: 0.1 + Math.random() * 0.3,
+}));
+
+function TechSpheres() {
+  const groupRef = useRef<THREE.Group>(null);
+  const mouse = useRef({ x: 0, y: 0 });
   const [isActive, setIsActive] = useState(false);
+  const meshRefs = useRef<(THREE.Mesh | null)[]>([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,102 +51,61 @@ function TechSphere({ color, position }: { color: string; position: [number, num
       setIsActive(window.scrollY > rect.top - window.innerHeight);
     };
 
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.current.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouse.current.y = -(e.clientY / window.innerHeight - 0.5) * 2;
+    };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
   }, []);
 
-  useFrame((_, delta) => {
-    if (!meshRef.current) return;
-    meshRef.current.rotation.x += delta * 0.3;
-    meshRef.current.rotation.y += delta * 0.2;
-  });
+  useFrame((state, delta) => {
+    if (!groupRef.current) return;
 
-  return (
-    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-      <mesh ref={meshRef} position={position}>
-        <sphereGeometry args={[0.5, 24, 24]} />
-        <meshStandardMaterial
-          color={color}
-          metalness={0.7}
-          roughness={0.2}
-          emissive={color}
-          emissiveIntensity={isActive ? 0.3 : 0.05}
-        />
-      </mesh>
-    </Float>
-  );
-}
+    // Gentle group rotation based on mouse
+    groupRef.current.rotation.y += (mouse.current.x * 0.1 - groupRef.current.rotation.y) * 0.03;
+    groupRef.current.rotation.x += (mouse.current.y * 0.05 - groupRef.current.rotation.x) * 0.03;
 
-function Pointer() {
-  const ref = useRef<any>(null);
-  useFrame(({ pointer, viewport }) => {
-    if (!ref.current) return;
-    ref.current.setNextKinematicTranslation({
-      x: pointer.x * viewport.width / 2,
-      y: pointer.y * viewport.height / 2,
-      z: 0,
+    // Rotate individual spheres
+    meshRefs.current.forEach((mesh, i) => {
+      if (!mesh) return;
+      const s = sphereData[i];
+      mesh.rotation.y += delta * s.rotSpeed;
+      mesh.rotation.x += delta * s.rotSpeed * 0.6;
+
+      // Floating bob effect
+      const bob = Math.sin(state.clock.elapsedTime * 0.5 + i * 0.3) * 0.1;
+      mesh.position.y = s.position[1] + bob;
     });
   });
-  return (
-    <RigidBody ref={ref} type="kinematicPosition" colliders={false} position={[100, 100, 100]}>
-      <BallCollider args={[2]} />
-    </RigidBody>
-  );
-}
-
-function TechPhysics() {
-  const [isActive, setIsActive] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const el = document.getElementById("work");
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      setIsActive(window.scrollY > rect.top - window.innerHeight);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const spheres = useMemo(() => {
-    return Array.from({ length: 30 }, (_, i) => ({
-      color: techItems[i % techItems.length].color,
-      position: [
-        (Math.random() - 0.5) * 12,
-        (Math.random() - 0.5) * 8,
-        (Math.random() - 0.5) * 8,
-      ] as [number, number, number],
-      scale: 0.3 + Math.random() * 0.5,
-    }));
-  }, []);
 
   return (
-    <Physics gravity={[0, 0, 0]}>
-      <Pointer />
-      {spheres.map((s, i) => (
-        <RigidBody
+    <group ref={groupRef}>
+      {sphereData.map((s, i) => (
+        <mesh
           key={i}
+          ref={(el) => { meshRefs.current[i] = el; }}
           position={s.position}
-          linearDamping={0.75}
-          angularDamping={0.15}
-          colliders={false}
+          scale={s.scale}
         >
-          <BallCollider args={[s.scale]} />
-          <mesh>
-            <sphereGeometry args={[s.scale, 20, 20]} />
-            <meshStandardMaterial
-              color={s.color}
-              metalness={0.8}
-              roughness={0.1}
-              emissive={s.color}
-              emissiveIntensity={isActive ? 0.4 : 0.05}
-            />
-          </mesh>
-        </RigidBody>
+          <sphereGeometry args={[1, 20, 20]} />
+          <meshStandardMaterial
+            color={s.color}
+            metalness={0.8}
+            roughness={0.15}
+            emissive={s.color}
+            emissiveIntensity={isActive ? 0.35 : 0.08}
+          />
+        </mesh>
       ))}
-    </Physics>
+    </group>
   );
 }
 
@@ -160,15 +132,17 @@ export default function TechStack() {
       </div>
 
       <Canvas
-        camera={{ position: [0, 0, 20], fov: 35 }}
+        camera={{ position: [0, 0, 14], fov: 45 }}
         style={{ width: "100%", height: "400px" }}
         gl={{ alpha: true, antialias: true }}
+        dpr={[1, 2]}
       >
-        <ambientLight intensity={0.8} />
-        <spotLight position={[20, 20, 25]} penumbra={1} angle={0.2} color="white" intensity={1.5} />
-        <directionalLight position={[0, 5, -4]} intensity={1} />
-        <TechPhysics />
-        <Environment preset="night" />
+        <ambientLight intensity={0.4} />
+        <pointLight position={[6, 6, 6]} intensity={1.5} color="#ffffff" />
+        <pointLight position={[-6, -4, 4]} intensity={0.8} color="#F97316" />
+        <pointLight position={[0, 6, -4]} intensity={0.5} color="#A855F7" />
+        <pointLight position={[-4, -6, 2]} intensity={0.4} color="#3B82F6" />
+        <TechSpheres />
       </Canvas>
     </section>
   );
