@@ -1,0 +1,42 @@
+.techstack-section {
+  position: relative;
+  z-index: 1;
+  padding: 100px 0 60px;
+  background: #0a0e17;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.techstack-header {
+  width: min(1300px, 100% - 80px);
+  margin: 0 auto 60px;
+}
+
+.techstack-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: #F97316;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.techstack-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 800;
+  color: #fafafa;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.techstack-title span {
+  color: #F97316;
+}
+
+@media (max-width: 768px) {
+  .techstack-header {
+    width: calc(100% - 48px);
+  }
+}

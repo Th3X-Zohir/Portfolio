@@ -1,0 +1,163 @@
+.whatido-section {
+  background: #0a0e17;
+  padding: 140px 0;
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.whatido-inner {
+  width: min(1300px, 100% - 80px);
+  margin: 0 auto;
+}
+
+.whatido-header {
+  margin-bottom: 80px;
+}
+
+.whatido-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: #F97316;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.whatido-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 800;
+  color: #fafafa;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.whatido-title span {
+  color: #F97316;
+}
+
+.whatido-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.whatido-card {
+  padding: 36px 32px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  transition: border-color 0.3s, background 0.3s, transform 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.whatido-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(249, 115, 22, 0), transparent);
+  transition: background 0.3s;
+}
+
+.whatido-card:hover {
+  border-color: rgba(249, 115, 22, 0.25);
+  background: rgba(249, 115, 22, 0.03);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(249, 115, 22, 0.05);
+}
+
+.whatido-card:hover::before {
+  background: linear-gradient(to right, transparent, rgba(249, 115, 22, 0.5), transparent);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.card-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: #F97316;
+  font-weight: 600;
+}
+
+.card-accent-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(249, 115, 22, 0.15);
+}
+
+.card-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fafafa;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.card-desc {
+  font-size: 0.85rem;
+  color: #71717A;
+  line-height: 1.75;
+  margin-bottom: 24px;
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.card-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 500;
+  padding: 3px 9px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  color: #a1a1aa;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.whatido-card:hover .card-tag {
+  border-color: rgba(249, 115, 22, 0.2);
+  color: #F97316;
+}
+
+@media (max-width: 1024px) {
+  .whatido-cards {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .whatido-section {
+    padding: 80px 0;
+  }
+
+  .whatido-inner {
+    width: calc(100% - 48px);
+  }
+
+  .whatido-header {
+    margin-bottom: 48px;
+  }
+
+  .whatido-cards {
+    max-width: 100%;
+  }
+}

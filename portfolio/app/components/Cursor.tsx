@@ -1,89 +1,78 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import "./Cursor.css";
 
 export default function Cursor() {
-  const cursorX = useMotionValue(-100);
-  const cursorY = useMotionValue(-100);
-  const [label, setLabel] = useState("");
-  const [isPointer, setIsPointer] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-
-  const springConfig = { damping: 25, stiffness: 200 };
-  const x = useSpring(cursorX, springConfig);
-  const y = useSpring(cursorY, springConfig);
-
-  // Trailing dot — faster response
-  const fastConfig = { damping: 30, stiffness: 500 };
-  const tx = useSpring(cursorX, fastConfig);
-  const ty = useSpring(cursorY, fastConfig);
+  const cursorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const move = (e: MouseEvent) => {
-      cursorX.set(e.clientX);
-      cursorY.set(e.clientY);
-      setIsVisible(true);
+    if (typeof window === "undefined") return;
+    if (window.innerWidth < 768) return;
 
-      const el = e.target as HTMLElement;
-      const link = el.closest("a, button, [data-cursor]");
-      if (link) {
-        setIsPointer(true);
-        setLabel((link as HTMLElement).dataset.cursor || "");
-      } else {
-        setIsPointer(false);
-        setLabel("");
+    const cursor = cursorRef.current;
+    if (!cursor) return;
+
+    let mouseX = 0;
+    let mouseY = 0;
+    let curX = 0;
+    let curY = 0;
+    let isHovering = false;
+
+    const onMove = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    };
+
+    const tick = () => {
+      if (!isHovering) {
+        curX += (mouseX - curX) / 6;
+        curY += (mouseY - curY) / 6;
+        gsap.set(cursor, { x: curX, y: curY });
+      }
+      requestAnimationFrame(tick);
+    };
+
+    document.addEventListener("mousemove", onMove);
+    requestAnimationFrame(tick);
+
+    const handleEnter = (e: MouseEvent) => {
+      const target = e.currentTarget as HTMLElement;
+      const cursorType = (target as HTMLElement).dataset.cursor;
+
+      if (cursorType === "disable") {
+        cursor.classList.add("cursor--hidden");
+        isHovering = true;
+      } else if (cursorType === "icon") {
+        const rect = target.getBoundingClientRect();
+        cursor.classList.add("cursor--icon");
+        isHovering = true;
+        gsap.to(cursor, { x: rect.left, y: rect.top, duration: 0.15 });
+      } else if (cursorType === "link") {
+        cursor.classList.add("cursor--link");
+        isHovering = true;
       }
     };
 
-    const leave = () => setIsVisible(false);
-    const enter = () => setIsVisible(true);
+    const handleLeave = () => {
+      cursor.classList.remove("cursor--hidden", "cursor--icon", "cursor--link");
+      isHovering = false;
+    };
 
-    window.addEventListener("mousemove", move);
-    document.addEventListener("mouseleave", leave);
-    document.addEventListener("mouseenter", enter);
+    document.querySelectorAll<HTMLElement>("[data-cursor]").forEach((el) => {
+      el.addEventListener("mouseenter", handleEnter as EventListener);
+      el.addEventListener("mouseleave", handleLeave);
+    });
 
     return () => {
-      window.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseleave", leave);
-      document.removeEventListener("mouseenter", enter);
+      document.removeEventListener("mousemove", onMove);
+      document.querySelectorAll<HTMLElement>("[data-cursor]").forEach((el) => {
+        el.removeEventListener("mouseenter", handleEnter as EventListener);
+        el.removeEventListener("mouseleave", handleLeave);
+      });
     };
-  }, [cursorX, cursorY]);
+  }, []);
 
-  if (typeof window === "undefined") return null;
-
-  return (
-    <>
-      {/* Outer ring */}
-      <motion.div
-        className="cursor-ring"
-        style={{
-          x,
-          y,
-          opacity: isVisible ? 1 : 0,
-          scale: isPointer ? 1.6 : 1,
-          background: isPointer
-            ? "rgba(249,115,22,0.08)"
-            : "rgba(249,115,22,0.04)",
-          borderColor: isPointer ? "#F97316" : "rgba(249,115,22,0.5)",
-        }}
-        transition={{ scale: { damping: 20, stiffness: 200 } }}
-      >
-        {label && (
-          <span className="cursor-label">{label}</span>
-        )}
-      </motion.div>
-
-      {/* Inner dot */}
-      <motion.div
-        className="cursor-dot"
-        style={{
-          x: tx,
-          y: ty,
-          opacity: isVisible ? 1 : 0,
-          scale: isPointer ? 0 : 1,
-        }}
-      />
-    </>
-  );
+  return <div className="cursor" ref={cursorRef} data-cursor="disable" />;
 }

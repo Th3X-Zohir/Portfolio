@@ -1,821 +1,131 @@
 "use client";
 
-import { useState, useEffect, useRef, ReactNode } from "react";
-import { motion, useMotionValue, useSpring, useTransform, useInView } from "framer-motion";
-import {
-  Github, Linkedin, Mail, ArrowRight, Menu, X,
-  ExternalLink, Brain, Zap, Shield, Database, Radio,
-  ShoppingCart, Globe, Users, Building2, HeartPulse, Link2, Cpu, Sparkles
-} from "lucide-react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import ClientOnly from "./components/ClientOnly";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+import Loading from "./components/Loading";
 import Cursor from "./components/Cursor";
+import Navbar from "./components/Navbar";
+import SocialIcons from "./components/SocialIcons";
+import Landing from "./components/Landing";
+import About from "./components/About";
+import WhatIDo from "./components/WhatIDo";
+import Career from "./components/Career";
+import Work from "./components/Work";
+import TechStack from "./components/TechStack";
+import Contact from "./components/Contact";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const Scene3D = dynamic(() => import("./components/Scene3D"), { ssr: false });
 
-// ============================================================
-// TEXT SCRAMBLE — matrix-style decode on load
-// ============================================================
-function useTextScramble(target: string) {
-  const [display, setDisplay] = useState(target);
-  const [done, setDone] = useState(false);
-  const iterationRef = useRef(0);
-  const chars = "!@#$%^&*><abcdefghijklmnopqrstuvwxyz";
-
-  useEffect(() => {
-    let frame = 0;
-    const totalFrames = target.length * 3;
-    const animate = () => {
-      if (frame >= totalFrames) { setDisplay(target); setDone(true); return; }
-      setDisplay(
-        target.split("").map((char, i) => {
-          if (i < Math.floor(frame / 3)) return char;
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join("")
-      );
-      frame++;
-      requestAnimationFrame(animate);
-    };
-    const id = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target]);
-
-  return { display, done };
-}
-
-// ============================================================
-// MAGNETIC BUTTON — cursor-attracted, pure useMotionValue
-// ============================================================
-function MagneticButton({ children, className = "", href = "#", variant = "primary" }: {
-  children: ReactNode; className?: string; href?: string; variant?: "primary" | "outline";
-}) {
-  const ref = useRef<HTMLAnchorElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const springX = useSpring(x, { stiffness: 200, damping: 15 });
-  const springY = useSpring(y, { stiffness: 200, damping: 15 });
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = ref.current!.getBoundingClientRect();
-    x.set(e.clientX - (rect.left + rect.width / 2));
-    y.set(e.clientY - (rect.top + rect.height / 2));
-  };
-
-  return (
-    <motion.a
-      ref={ref} href={href}
-      className={`btn ${variant === "primary" ? "btn-primary" : "btn-outline"} ${className}`}
-      style={{ x: springX, y: springY }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => { x.set(0); y.set(0); }}
-    >
-      {children}
-    </motion.a>
-  );
-}
-
-// ============================================================
-// SCROLL REVEAL — fade + translateY with viewport trigger
-// ============================================================
-function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 32 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
-      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-// ============================================================
-// STAGGER CONTAINER — blur + fade sequential
-// ============================================================
-function StaggerContainer({ children, className = "", delayChildren = 0.05 }: { children: ReactNode; className?: string; delayChildren?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-60px" });
-  return (
-    <motion.div
-      ref={ref} initial="hidden" animate={isInView ? "visible" : "hidden"}
-      variants={{
-        visible: { transition: { staggerChildren: 0.08, delayChildren } },
-        hidden: {},
-      }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function StaggerItem({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
-        visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { type: "spring" as const, stiffness: 120, damping: 18 } },
-      }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-// ============================================================
-// SCROLL PROGRESS BAR
-// ============================================================
-function ScrollProgress() {
-  const scaleX = useMotionValue(0);
-  const scaleXSpring = useSpring(scaleX, { stiffness: 100, damping: 20 });
-
-  useEffect(() => {
-    const onScroll = () => {
-      const el = document.documentElement;
-      const scrolled = el.scrollTop;
-      const total = el.scrollHeight - el.clientHeight;
-      scaleX.set(total > 0 ? scrolled / total : 0);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [scaleX]);
-
-  return (
-    <motion.div
-      className="scroll-progress"
-      style={{ scaleX: scaleXSpring, width: "100%" }}
-    />
-  );
-}
-
-// ============================================================
-// MARQUEE TICKER
-// ============================================================
-function Marquee() {
-  const items = [
-    "TypeScript", "Python", "Laravel", "Next.js", "LLM Orchestration",
-    "WebSockets", "PostgreSQL", "LangChain", "Docker", "FastAPI",
-    "AI Gateway", "RBAC", "JWT Auth", "Firebase", "Redis",
-  ];
-  const doubled = [...items, ...items];
-
-  return (
-    <div className="marquee-section">
-      <div className="marquee-track">
-        {doubled.map((item, i) => (
-          <span key={i} className="marquee-item">
-            {item} <span className="sep">&#9830;</span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// PROJECT VISUAL — CSS-generated background with icon
-// ============================================================
-// ============================================================
-// PROJECTS CAROUSEL — full-width focus slider (inspired by 3D portfolio)
-// ============================================================
-function ProjectsCarousel() {
-  const projects = [
-    { id: "efamily", badge: "Government", status: "Live System",
-      title: "E-Family Court", subtitle: "National e-Judiciary Platform — Bangladesh",
-      desc: "Full-stack developer on Bangladesh's end-to-end digital case filing system for Family Courts. Citizens file cases, track progress, and make payments online. Judges manage hearings; lawyers submit documents. Deployed across Dhaka and Chattogram.",
-      tech: ["Laravel", "PHP", "MSSQL", "JWT", "dompdf"], url: "https://efamilycourt.judiciary.gov.bd/",
-      accent: "#3B82F6" },
-    { id: "rschat", badge: "Real-Time", status: "1,874 commits",
-      title: "RSChat", subtitle: "Production WebSocket Infrastructure",
-      desc: "Production-grade real-time chat handling thousands of concurrent connections. WebSocket rooms, admin dashboards, user panels, and full TypeScript throughout.",
-      tech: ["TypeScript", "Socket.io", "Node.js", "WebSockets"], url: "https://github.com/Th3X-Zohir/RSChat",
-      accent: "#F97316" },
-    { id: "falconai", badge: "AI / LLM", status: "1,187 commits",
-      title: "FalconAI", subtitle: "AI Gateway & LLM Orchestration",
-      desc: "Core contributor to AI gateway infrastructure for enterprise clients. Multi-model orchestration across gpt-4, claude-3, and gemini with intelligent routing and fallbacks.",
-      tech: ["Python", "LLM", "LangChain", "AI Gateway"], url: "https://github.com/zionmezba/FalconAI",
-      accent: "#A855F7" },
-    { id: "routine", badge: "Automation", status: "Daily Active",
-      title: "DIU Routine Scrapper", subtitle: "University Automation Platform",
-      desc: "Centralized automation for Daffodil International University. Scrapes official routines, builds CSE databases, FCM push notifications, and full Android app.",
-      tech: ["Python Flask", "SocketIO", "Firebase FCM", "Android"], url: "https://routine.zohirrayhan.me/",
-      accent: "#F97316" },
-    { id: "studenthub", badge: "SaaS", status: "Live System",
-      title: "Student Hub", subtitle: "University Management System",
-      desc: "Official university platform with orientation signup, digital food tokens, club management with payments, and dynamic course enrollment.",
-      tech: ["Laravel", "Blade", "MySQL", "JWT"], url: "https://studentshub.daffodilvarsity.edu.bd/team",
-      accent: "#3B82F6" },
-    { id: "neuralops", badge: "AI / Ops", status: "Active development",
-      title: "Neural Ops", subtitle: "AI Gateway Admin Control Plane",
-      desc: "Multi-provider AI gateway with live admin dashboard. Rate limiting, API key management, usage analytics, provider health, and one-click operational controls.",
-      tech: ["Node.js", "TypeScript", "Fastify", "React", "Recharts"], url: "https://github.com/Th3X-Zohir/neural-ops-ai-gateway",
-      accent: "#22C55E" },
-    { id: "ecomai", badge: "E-Commerce", status: "96 commits",
-      title: "ecomai", subtitle: "Multi-Tenant SaaS Platform",
-      desc: "Shopify-alternative with multi-tenant architecture, Stripe payments, subscription billing, delivery tracking, and admin dashboards — one codebase, multiple stores.",
-      tech: ["Next.js", "TypeScript", "Stripe", "PostgreSQL"], url: "https://github.com/Th3X-Zohir/ecomai",
-      accent: "#F97316" },
-    { id: "linkpay", badge: "FinTech", status: "56 commits",
-      title: "LINKPAY", subtitle: "Payment Integration Platform",
-      desc: "Payment gateway integration connecting multiple providers with modern architecture for reliable, secure, and scalable transaction processing.",
-      tech: ["TypeScript", "Node.js", "Payment APIs"], url: "https://github.com/Th3X-Zohir/LINKPAY",
-      accent: "#22C55E" },
-    { id: "bloodbridge", badge: "Healthcare", status: "Live System",
-      title: "Blood Bridge", subtitle: "Blood Donor Finder",
-      desc: "Real-time geolocation-based donor finder with interactive maps, blood group filtering by radius, live donor ETA tracking, and community feed for urgent requests.",
-      tech: ["Python Flask", "Leaflet.js", "MySQL", "Geolocation"], url: "https://blood.shafinahmed.site/find-donor/dummy",
-      accent: "#EF4444" },
-  ];
-
-  const [current, setCurrent] = useState(0);
-
-  const icons: Record<string, ReactNode> = {
-    efamily: <Building2 size={36} color={projects[current].accent} />,
-    rschat: <Radio size={36} color={projects[current].accent} />,
-    falconai: <Brain size={36} color={projects[current].accent} />,
-    neuralops: <Cpu size={36} color={projects[current].accent} />,
-    routine: <Database size={36} color={projects[current].accent} />,
-    studenthub: <Users size={36} color={projects[current].accent} />,
-    ecomai: <ShoppingCart size={36} color={projects[current].accent} />,
-    linkpay: <Link2 size={36} color={projects[current].accent} />,
-    bloodbridge: <HeartPulse size={36} color={projects[current].accent} />,
-  };
-
-  const go = (i: number) => {
-    setCurrent((((i % projects.length) + projects.length) % projects.length));
-  };
-
-  const p = projects[current];
-  const num = String(current + 1).padStart(2, "0");
-  const isLive = p.status === "Live System" || p.status === "Daily Active" || p.status === "Active development";
-
-  return (
-    <div className="carousel-wrapper">
-      <motion.div
-        key={current}
-        initial={{ opacity: 0, x: 40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="carousel-slide"
-      >
-        {/* Visual panel */}
-        <div className="proj-visual">
-          <div className={`proj-visual-bg vis-bg--${p.id}`} />
-          <div className="proj-visual-grid" />
-          <div className="proj-visual-glow" />
-          <div className="proj-visual-center">
-            <div className="proj-icon-wrap">
-              {icons[p.id]}
-            </div>
-            <span className="proj-badge" style={{ color: p.accent, borderColor: p.accent + "50", background: p.accent + "15" }}>
-              {p.badge}
-            </span>
-          </div>
-          {isLive && (
-            <div className="proj-live">
-              <span className="live-dot" />{p.status}
-            </div>
-          )}
-        </div>
-
-        {/* Content panel */}
-        <div className="proj-content">
-          <div className="proj-content-inner">
-            <div className="proj-number">{num}</div>
-            <div className="proj-info">
-              <div className="proj-title-row">
-                <h3>{p.title}</h3>
-                <a href={p.url} target="_blank" rel="noopener noreferrer" className="proj-link-btn">
-                  View <ExternalLink size={13} />
-                </a>
-              </div>
-              <p className="proj-subtitle">{p.subtitle}</p>
-              <p className="proj-desc">{p.desc}</p>
-              <div className="proj-tech">
-                {p.tech.map((t) => <span key={t} className="tech-tag">{t}</span>)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Navigation */}
-      <div className="proj-nav">
-        <div className="proj-nav-inner">
-          <button className="proj-arrow" onClick={() => go(current - 1)} aria-label="Previous">
-            <ArrowRight size={16} style={{ transform: "rotate(180deg)" }} />
-          </button>
-          <div className="proj-dots">
-            {projects.map((_, i) => (
-              <button
-                key={i}
-                className={`proj-dot ${i === current ? "active" : ""}`}
-                onClick={() => go(i)}
-                aria-label={`Project ${i + 1}`}
-                style={i === current ? { background: projects[current].accent, borderColor: projects[current].accent, boxShadow: `0 0 8px ${projects[current].accent}80` } : {}}
-              />
-            ))}
-          </div>
-          <button className="proj-arrow" onClick={() => go(current + 1)} aria-label="Next">
-            <ArrowRight size={16} />
-          </button>
-        </div>
-        <p className="proj-counter">{current + 1} / {projects.length}</p>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// NAVBAR
-// ============================================================
-function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [active, setActive] = useState("");
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    const sections = document.querySelectorAll("section[id]");
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); }),
-      { threshold: 0.3 }
-    );
-    sections.forEach((s) => obs.observe(s));
-    return () => obs.disconnect();
-  }, []);
-
-  const links = [
-    { href: "#about", label: "About" },
-    { href: "#projects", label: "Projects" },
-    { href: "#contact", label: "Contact" },
-  ];
-
-  return (
-    <>
-      <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <div className="container nav-inner">
-          <a href="#" className="nav-logo">Zohir<span className="dot">.</span></a>
-          <ul className="nav-links">
-            {links.map((l) => (
-              <li key={l.href}>
-                <a href={l.href} className={active === l.href.slice(1) ? "active" : ""}>{l.label}</a>
-              </li>
-            ))}
-          </ul>
-          <div className="nav-status">
-            <span className="nav-status-dot" />
-            Available
-          </div>
-          <a href="#contact" className="nav-cta">Hire Me</a>
-          <button className="nav-hamburger" onClick={() => setMobileOpen(true)} aria-label="Open menu">
-            <Menu size={22} />
-          </button>
-        </div>
-      </nav>
-
-      {mobileOpen && (
-        <div className="mobile-nav open">
-          <button className="mobile-nav-close" onClick={() => setMobileOpen(false)} aria-label="Close">
-            <X size={24} />
-          </button>
-          {links.map((l, i) => (
-            <motion.a key={l.href} href={l.href} onClick={() => setMobileOpen(false)}
-              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}>
-              {l.label}
-            </motion.a>
-          ))}
-          <a href="#contact" onClick={() => setMobileOpen(false)}
-            style={{ color: "var(--color-accent)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.2rem" }}>
-            Hire Me
-          </a>
-        </div>
-      )}
-    </>
-  );
-}
-
-// ============================================================
-// HERO
-// ============================================================
-function Hero() {
-  const { display: nameDisplay } = useTextScramble("Zohir Rayhan");
-  const { display: taglineDisplay } = useTextScramble("I build AI systems that ship.");
-  const ref = useRef<HTMLDivElement>(null);
-  const heroImgY = useMotionValue(0);
-  const heroImgYSpring = useSpring(heroImgY, { stiffness: 60, damping: 20 });
-
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
-  useEffect(() => {
-    const onScroll = () => {
-      heroImgY.set(window.scrollY * 0.15);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [heroImgY]);
-
-  return (
-    <section className="hero" id="hero" ref={ref}>
-      <div className="hero-bg-grid" />
-      <div className="hero-bg-glow" />
-
-      <div className="container">
-        <div className="hero-inner">
-          {/* Left — text content */}
-          <div className="hero-text">
-            <motion.div
-              className="hero-eyebrow"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <Sparkles size={11} />
-              AI-Native Full-Stack Developer
-            </motion.div>
-
-            <motion.h1
-              className="hero-name"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {nameDisplay}<span className="dot">.</span>
-            </motion.h1>
-
-            <motion.p
-              className="hero-tagline"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {taglineDisplay}
-            </motion.p>
-
-            <motion.p
-              className="hero-bio"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            >
-              Full-stack developer specializing in <strong>AI/LLM orchestration</strong>,{" "}
-              <strong>government-scale platforms</strong>, and <strong>production SaaS products</strong>.{" "}
-              6,700+ commits across 67 repositories — systems that serve thousands of real users
-              in Bangladesh's courts, universities, and startups.
-            </motion.p>
-
-            <motion.div
-              className="hero-actions"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <MagneticButton href="#projects" variant="primary">
-                View Projects <ArrowRight size={15} />
-              </MagneticButton>
-              <MagneticButton href="#contact" variant="outline">
-                Get in Touch
-              </MagneticButton>
-            </motion.div>
-          </div>
-
-          {/* Right — 3D visual panel */}
-          <motion.div
-            className="hero-visual"
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            style={{ y: heroImgYSpring }}
-          >
-            <div className="hero-visual-inner hero-3d-inner">
-              <ClientOnly>
-                <Scene3D />
-              </ClientOnly>
-
-              {/* Floating metric cards */}
-              <div className="hero-metric-float hero-metric-float--1">
-                <div className="hero-metric-float-value">
-                  <span className="accent">6.7</span>K+
-                </div>
-                <div className="hero-metric-float-label">Commits</div>
-              </div>
-              <div className="hero-metric-float hero-metric-float--2">
-                <div className="hero-metric-float-value">
-                  <span className="accent">27+</span>
-                </div>
-                <div className="hero-metric-float-label">Live Projects</div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-
-      <div className="hero-scroll-hint">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M12 5v14M5 12l7 7 7-7" />
-        </svg>
-        Scroll
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
-// ABOUT
-// ============================================================
-function About() {
-  const strengths = [
-    { icon: <Brain size={12} />, title: "AI-Native Architecture", desc: "LLM orchestration, AI gateways, function calling, and vector databases at production scale." },
-    { icon: <Building2 size={12} />, title: "Government-Scale Platforms", desc: "End-to-end digital systems for e-Judiciary — case filing, tracking, payments, and SMS/email workflows." },
-    { icon: <Zap size={12} />, title: "Full-Stack Delivery", desc: "End-to-end builds: Laravel backends, Next.js frontends, real-time features, and production deployment." },
-    { icon: <Shield size={12} />, title: "Enterprise Security", desc: "RBAC, JWT authentication, multi-role panels, and secure payment processing." },
-  ];
-
-  return (
-    <section className="section" id="about">
-      <div className="container">
-        <div className="about-grid">
-          <Reveal>
-            <div className="section-label">About</div>
-            <h2>Production systems,<br />not pet projects.</h2>
-            <p>
-              I build software that people actually use. The <strong>E-Family Court platform</strong> handles
-              case filings for Bangladesh's judiciary across Dhaka and Chattogram. The{" "}
-              <strong>DIU Routine Scraper</strong> serves thousands of students daily.{" "}
-              <strong>Student Hub</strong> manages clubs, courses, and orientation for an entire university.
-            </p>
-            <p>
-              My stack spans <strong>Python</strong> for AI and automation, <strong>TypeScript</strong> for
-              modern web, and <strong>Laravel</strong> for enterprise backends. I handle everything from
-              database design to deployment — and I write code that others can actually maintain.
-            </p>
-            <p>
-              Available for freelance projects, long-term collaborations, and full-time roles.
-              If you need someone who ships, let's talk.
-            </p>
-          </Reveal>
-
-          <StaggerContainer className="about-strengths">
-            {strengths.map((s) => (
-              <StaggerItem key={s.title}>
-                <div className="strength-item">
-                  <div className="strength-icon">{s.icon}</div>
-                  <div className="strength-text">
-                    <h4>{s.title}</h4>
-                    <p>{s.desc}</p>
-                  </div>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
-// PROJECTS — Bento Grid
-// ============================================================
-function Projects() {
-  return (
-    <section className="section" id="projects">
-      <div className="container">
-        <Reveal className="projects-header">
-          <div className="section-label">Featured Projects</div>
-          <h2 className="section-heading">Built for real people,<br />running in production.</h2>
-          <p className="section-sub">
-            Not portfolio demos. These are live systems serving thousands of users across Bangladesh's
-            judiciary, universities, and startups.
-          </p>
-        </Reveal>
-        <ProjectsCarousel />
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
-// SKILLS
-// ============================================================
-function Skills() {
-  const categories = [
-    {
-      title: "Languages",
-      tags: ["TypeScript", "Python", "PHP", "SQL", "Java", "Bash", "HTML/CSS", "JavaScript"],
-    },
-    {
-      title: "Frameworks",
-      tags: ["Laravel", "Next.js", "React", "Node.js", "Flask", "Socket.io", "FastAPI"],
-    },
-    {
-      title: "AI & Data",
-      tags: ["OpenAI API", "LangChain", "Vector DBs", "Playwright", "Selenium", "Pandas"],
-    },
-    {
-      title: "Infrastructure",
-      tags: ["PostgreSQL", "MySQL", "MSSQL", "Redis", "Firebase", "Docker", "AWS"],
-    },
-  ];
-
-  return (
-    <section className="section section-alt" id="skills">
-      <div className="container">
-        <Reveal className="skills-header">
-          <div className="section-label">Stack</div>
-          <h2 className="section-heading">Tools of the trade.</h2>
-          <p className="section-sub">The full stack, from AI models to production databases.</p>
-        </Reveal>
-
-        <StaggerContainer className="stack-grid">
-          {categories.map((cat) => (
-            <StaggerItem key={cat.title}>
-              <div className="stack-category">
-                <h4>{cat.title}</h4>
-                <div className="stack-tags">
-                  {cat.tags.map((tag) => (
-                    <span key={tag} className="stack-tag">{tag}</span>
-                  ))}
-                </div>
-              </div>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
-// EXPERIENCE
-// ============================================================
-function Experience() {
-  const items = [
-    {
-      period: "2025 — Present",
-      title: "E-Family Court Platform",
-      subtitle: "Full-Stack Developer — Government Project",
-      desc: "Building Bangladesh's national e-filing platform for Family Courts. Case submission, payment processing, SMS/email notifications, judge dashboards, and lawyer portals. Microsoft SQL Server backend with Laravel, JWT auth, and dompdf for document generation.",
-      current: true,
-    },
-    {
-      period: "2020 — Present",
-      title: "Independent Development",
-      subtitle: "Full-Stack Developer — Freelance",
-      desc: "Building and maintaining production systems across universities, fintech, and AI. RSChat (1,874 commits), DIU Routine Platform, Student Hub, Blood Bridge, LINKPAY, and multiple AI gateway contributions. 6,700+ commits across 67 repositories.",
-      current: false,
-    },
-    {
-      period: "2020 — 2024",
-      title: "University Tools & Automation",
-      subtitle: "Student Developer — DIU",
-      desc: "Built the DIU Routine Scraper (Flask, SocketIO, FCM, Android), Student Hub (Laravel), and campus tools serving thousands of students and faculty daily.",
-      current: false,
-    },
-  ];
-
-  return (
-    <section className="section" id="experience">
-      <div className="container">
-        <Reveal className="experience-header">
-          <div className="section-label">Experience</div>
-          <h2 className="section-heading">Where I've worked.</h2>
-          <p className="section-sub">A track record of production systems, not just coursework.</p>
-        </Reveal>
-
-        <StaggerContainer className="timeline">
-          {items.map((item) => (
-            <StaggerItem key={item.title}>
-              <div className={`timeline-item ${item.current ? "current" : ""}`}>
-                <div className="timeline-marker">
-                  <div className="timeline-marker-dot" />
-                </div>
-                <div className="timeline-content">
-                  <div className="timeline-period">{item.period}</div>
-                  <h3>{item.title}</h3>
-                  <h4>{item.subtitle}</h4>
-                  <p>{item.desc}</p>
-                </div>
-              </div>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
-// CONTACT
-// ============================================================
-function Contact() {
-  return (
-    <section className="contact" id="contact">
-      <div className="container">
-        <div className="contact-inner">
-          <Reveal>
-            <div className="section-label" style={{ justifyContent: "center" }}>Contact</div>
-          </Reveal>
-          <Reveal delay={0.08}>
-            <h2 className="contact-heading">
-              Let's build<br />something that ships.
-            </h2>
-          </Reveal>
-          <Reveal delay={0.15}>
-            <p className="contact-sub" style={{ textAlign: "center" }}>
-              Available for freelance projects, full-time roles, and long-term collaborations.
-              I work across the stack — AI systems, SaaS platforms, or anything that needs shipping.
-            </p>
-          </Reveal>
-
-          <Reveal delay={0.2}>
-            <div className="contact-card">
-              <a href="mailto:Zohirrayhanweb@gmail.com" className="contact-email">
-                Zohirrayhanweb@gmail.com
-              </a>
-              <div className="contact-availability">
-                <span className="nav-status-dot" />
-                Available for new projects
-              </div>
-              <div className="contact-actions">
-                <MagneticButton href="mailto:Zohirrayhanweb@gmail.com" variant="primary">
-                  <Mail size={15} /> Send Email
-                </MagneticButton>
-                <MagneticButton href="https://github.com/Th3X-Zohir" variant="outline">
-                  <Github size={15} /> GitHub
-                </MagneticButton>
-              </div>
-              <div className="contact-social">
-                <a href="https://github.com/Th3X-Zohir" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="GitHub">
-                  <Github size={17} />
-                </a>
-                <a href="https://linkedin.com/in/th3x-zohir" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="LinkedIn">
-                  <Linkedin size={17} />
-                </a>
-                <a href="https://twitter.com/th3x_zohir" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Twitter">
-                  <X size={17} />
-                </a>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
-// FOOTER
-// ============================================================
-function Footer() {
-  return (
-    <footer className="footer">
-      <div className="container footer-inner">
-        <div className="footer-left">
-          <p>
-            Built by <a href="https://github.com/Th3X-Zohir" target="_blank" rel="noopener noreferrer">Zohir Rayhan</a>
-            &nbsp;&middot;&nbsp; {new Date().getFullYear()}
-          </p>
-        </div>
-        <div className="footer-right">
-          <a href="#hero">Top</a>
-          <a href="https://github.com/Th3X-Zohir" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a href="#contact">Contact</a>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-// ============================================================
-// MAIN PAGE
-// ============================================================
 export default function Home() {
+  const [loaded, setLoaded] = useState(false);
+
+  const handleLoadComplete = () => {
+    setLoaded(true);
+    setTimeout(() => {
+      initAnimations();
+    }, 100);
+  };
+
   return (
     <>
+      {!loaded && <Loading onComplete={handleLoadComplete} />}
       <Cursor />
-      <ScrollProgress />
       <Navbar />
-      <Hero />
-      <Marquee />
-      <About />
-      <Projects />
-      <Skills />
-      <Experience />
-      <Contact />
-      <Footer />
+      <SocialIcons />
+      <main className="main-body">
+        <Landing>
+          <Scene3D />
+        </Landing>
+        <About />
+        <WhatIDo />
+        <Career />
+        <Work />
+        <TechStack />
+        <Contact />
+      </main>
     </>
   );
+}
+
+function initAnimations() {
+  if (typeof window === "undefined") return;
+  const isDesktop = window.innerWidth > 1024;
+  const triggerStart = isDesktop ? "20% 80%" : "top 70%";
+
+  document.querySelectorAll<HTMLElement>("div.para").forEach((el) => {
+    el.classList.add("visible");
+    const text = el.textContent || "";
+    el.innerHTML = text.trim().split(/\s+/).map((w) =>
+      `<span class="split-word" style="display:inline-block;overflow:hidden;vertical-align:bottom;"><span class="split-word-inner" style="display:inline-block;">${w}</span></span>`
+    ).join(" ");
+    const words = Array.from(el.querySelectorAll<HTMLElement>(".split-word-inner"));
+    gsap.fromTo(words, { y: 60, opacity: 0 }, {
+      y: 0, opacity: 1, duration: 0.8, ease: "power3.out", stagger: 0.03,
+      scrollTrigger: { trigger: el, toggleActions: "play pause resume reverse", start: triggerStart },
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>("h2.title, h3.title").forEach((el) => {
+    const text = el.textContent || "";
+    el.innerHTML = text.split("").map((c) =>
+      c === " " ? " " : `<span class="split-char" style="display:inline-block;overflow:hidden;vertical-align:bottom;"><span class="split-char-inner" style="display:inline-block;">${c}</span></span>`
+    ).join("");
+    const chars = Array.from(el.querySelectorAll<HTMLElement>(".split-char-inner"));
+    gsap.fromTo(chars, { y: 80, opacity: 0, rotateX: -40 }, {
+      y: 0, opacity: 1, rotateX: 0, duration: 0.7, ease: "power2.inOut", stagger: 0.02,
+      scrollTrigger: { trigger: el, toggleActions: "play pause resume reverse", start: triggerStart },
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>("[data-stagger]").forEach((parent) => {
+    const children = Array.from(parent.children);
+    gsap.fromTo(children, { y: 50, opacity: 0 }, {
+      y: 0, opacity: 1, duration: 0.6, ease: "power3.out", stagger: 0.1,
+      scrollTrigger: { trigger: parent, start: "top 80%", toggleActions: "play none none reverse" },
+    });
+  });
+
+  gsap.fromTo(".career-info-box", { x: -80, opacity: 0 }, {
+    x: 0, opacity: 1, duration: 0.8, ease: "power3.out", stagger: 0.2,
+    scrollTrigger: { trigger: ".career-timeline", start: "top 70%", toggleActions: "play none none reverse" },
+  });
+
+  gsap.fromTo(".whatido-card", { y: 60, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.7, ease: "power3.out", stagger: 0.12,
+    scrollTrigger: { trigger: ".whatido-cards", start: "top 75%", toggleActions: "play none none reverse" },
+  });
+
+  gsap.fromTo(".about-text-block", { x: -80, opacity: 0 }, {
+    x: 0, opacity: 1, duration: 0.8, ease: "power3.out",
+    scrollTrigger: { trigger: ".about-section", start: "top 70%", toggleActions: "play none none reverse" },
+  });
+
+  gsap.fromTo(".about-stats", { x: 60, opacity: 0 }, {
+    x: 0, opacity: 1, duration: 0.8, ease: "power3.out",
+    scrollTrigger: { trigger: ".about-stats", start: "top 80%", toggleActions: "play none none reverse" },
+  });
+
+  gsap.fromTo(".work-header", { y: 60, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.7, ease: "power3.out",
+    scrollTrigger: { trigger: ".work-header", start: "top 80%", toggleActions: "play none none reverse" },
+  });
+
+  gsap.fromTo(".contact-header", { y: 60, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.7, ease: "power3.out",
+    scrollTrigger: { trigger: ".contact-header", start: "top 80%", toggleActions: "play none none reverse" },
+  });
+
+  gsap.fromTo(".contact-grid", { y: 60, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.7, ease: "power3.out", delay: 0.1,
+    scrollTrigger: { trigger: ".contact-grid", start: "top 85%", toggleActions: "play none none reverse" },
+  });
+
+  ScrollTrigger.refresh();
 }

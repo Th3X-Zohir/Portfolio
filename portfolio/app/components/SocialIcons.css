@@ -1,0 +1,40 @@
+.social-icons-bar {
+  position: fixed;
+  left: max(3%, 30px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.social-icon-item {
+  --ix: 0px;
+  --iy: 0px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3F3F46;
+  border-radius: 8px;
+  transition: color 0.2s, transform 0.2s;
+  text-decoration: none;
+}
+
+.social-icon-item:hover {
+  color: #F97316;
+  transform: translate(var(--ix, 0), var(--iy, 0));
+}
+
+.social-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 768px) {
+  .social-icons-bar { display: none; }
+}
