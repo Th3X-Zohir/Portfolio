@@ -25,7 +25,6 @@ const techItems = [
   { name: "MySQL", color: "#4479A1" },
 ];
 
-// Pre-compute sphere data with stable random positions
 const sphereData = Array.from({ length: 30 }, (_, i) => ({
   color: techItems[i % techItems.length].color,
   position: [
@@ -68,19 +67,14 @@ function TechSpheres() {
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
-
-    // Gentle group rotation based on mouse
     groupRef.current.rotation.y += (mouse.current.x * 0.1 - groupRef.current.rotation.y) * 0.03;
     groupRef.current.rotation.x += (mouse.current.y * 0.05 - groupRef.current.rotation.x) * 0.03;
 
-    // Rotate individual spheres
     meshRefs.current.forEach((mesh, i) => {
       if (!mesh) return;
       const s = sphereData[i];
       mesh.rotation.y += delta * s.rotSpeed;
       mesh.rotation.x += delta * s.rotSpeed * 0.6;
-
-      // Floating bob effect
       const bob = Math.sin(state.clock.elapsedTime * 0.5 + i * 0.3) * 0.1;
       mesh.position.y = s.position[1] + bob;
     });
@@ -122,10 +116,10 @@ export default function TechStack() {
   if (!isDesktop) return null;
 
   return (
-    <section className="techstack-section" id="techstack">
+    <section className="techstack-section" id="techstack" aria-labelledby="techstack-heading">
       <div className="techstack-header">
         <h3 className="title techstack-label">Tech Stack</h3>
-        <h2 className="techstack-title">
+        <h2 className="techstack-title" id="techstack-heading">
           The tools I<br />
           <span>work with.</span>
         </h2>
@@ -136,6 +130,7 @@ export default function TechStack() {
         style={{ width: "100%", height: "400px" }}
         gl={{ alpha: true, antialias: true }}
         dpr={[1, 2]}
+        aria-hidden="true"
       >
         <ambientLight intensity={0.4} />
         <pointLight position={[6, 6, 6]} intensity={1.5} color="#ffffff" />

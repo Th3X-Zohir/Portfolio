@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import "./Loading.css";
 
 const marqueeItems = [
@@ -24,7 +24,7 @@ export default function Loading({ onComplete }: { onComplete?: () => void }) {
           }, 600);
           return 100;
         }
-        return p + (100 - p) * 0.04 > 99.9 ? 100 : p + (100 - p) * 0.04;
+        return p + (100 - p) * 0.04;
       });
     }, 40);
     return () => clearInterval(interval);
@@ -33,14 +33,14 @@ export default function Loading({ onComplete }: { onComplete?: () => void }) {
   if (!visible) return null;
 
   return (
-    <div className="loading-screen">
+    <div className="loading-screen" role="status" aria-live="polite" aria-label="Loading portfolio">
       <div className="loading-content">
-        <div className="loading-logo">ZR<span>.</span></div>
-        <div className="loading-bar-track">
+        <div className="loading-logo">ZR<span aria-hidden="true">.</span></div>
+        <div className="loading-bar-track" aria-hidden="true">
           <div className="loading-bar-fill" style={{ width: `${progress}%` }} />
         </div>
-        <p className="loading-percent">{Math.floor(progress)}%</p>
-        <div className="loading-marquee">
+        <p className="loading-percent" aria-hidden="true">{Math.floor(progress)}%</p>
+        <div className="loading-marquee" aria-hidden="true">
           <div className="loading-marquee-track">
             {[...marqueeItems, ...marqueeItems].map((item, i) => (
               <span key={i} className="loading-marquee-item">

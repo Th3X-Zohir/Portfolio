@@ -25,17 +25,18 @@ export default function Cursor() {
       mouseY = e.clientY;
     };
 
+    let rafId: number;
     const tick = () => {
       if (!isHovering) {
         curX += (mouseX - curX) / 6;
         curY += (mouseY - curY) / 6;
         gsap.set(cursor, { x: curX, y: curY });
       }
-      requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     };
 
     document.addEventListener("mousemove", onMove);
-    requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
 
     const handleEnter = (e: MouseEvent) => {
       const target = e.currentTarget as HTMLElement;
@@ -67,6 +68,7 @@ export default function Cursor() {
 
     return () => {
       document.removeEventListener("mousemove", onMove);
+      cancelAnimationFrame(rafId);
       document.querySelectorAll<HTMLElement>("[data-cursor]").forEach((el) => {
         el.removeEventListener("mouseenter", handleEnter as EventListener);
         el.removeEventListener("mouseleave", handleLeave);
@@ -74,5 +76,5 @@ export default function Cursor() {
     };
   }, []);
 
-  return <div className="cursor" ref={cursorRef} data-cursor="disable" />;
+  return <div className="cursor" ref={cursorRef} data-cursor="disable" aria-hidden="true" />;
 }

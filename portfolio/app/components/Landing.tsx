@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./Landing.css";
@@ -10,14 +10,11 @@ if (typeof window !== "undefined") {
 }
 
 export default function Landing({ children }: { children?: React.ReactNode }) {
-  const textRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.innerWidth < 1024) return;
 
     const ctx = gsap.context(() => {
-      // Landing text animates in
       gsap.fromTo(
         ".landing-eyebrow",
         { y: 30, opacity: 0, filter: "blur(6px)" },
@@ -39,7 +36,6 @@ export default function Landing({ children }: { children?: React.ReactNode }) {
         { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.9 }
       );
 
-      // Scroll away landing text
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: ".landing-section",
@@ -58,20 +54,19 @@ export default function Landing({ children }: { children?: React.ReactNode }) {
   }, []);
 
   return (
-    <section className="landing-section" id="landingDiv">
-      {/* Background glow circles */}
-      <div className="landing-circle-glow landing-circle-glow--1" />
-      <div className="landing-circle-glow landing-circle-glow--2" />
-      <div className="landing-circle-glow landing-circle-glow--rim" />
+    <section className="landing-section" id="landingDiv" aria-labelledby="landing-heading">
+      <a href="#main-content" className="skip-link">Skip to content</a>
+      <div className="landing-circle-glow landing-circle-glow--1" aria-hidden="true" />
+      <div className="landing-circle-glow landing-circle-glow--2" aria-hidden="true" />
+      <div className="landing-circle-glow landing-circle-glow--rim" aria-hidden="true" />
 
-      {/* Left side: text content */}
       <div className="landing-text-block">
         <div className="landing-eyebrow">
-          <span className="eyebrow-dot" />
+          <span className="eyebrow-dot" aria-hidden="true" />
           AI-Native Full-Stack Developer
         </div>
 
-        <h1 className="landing-name">
+        <h1 className="landing-name" id="landing-heading">
           ZOHIR<br />
           <span>RAYHAN</span>
         </h1>
@@ -81,9 +76,9 @@ export default function Landing({ children }: { children?: React.ReactNode }) {
         </p>
 
         <div className="landing-actions">
-          <a href="#about" className="btn-primary" data-cursor="link">
+          <a href="#work" className="btn-primary" data-cursor="link">
             Explore Work
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
           </a>
           <a href="#contact" className="btn-ghost" data-cursor="link">
             Get in Touch
@@ -91,22 +86,19 @@ export default function Landing({ children }: { children?: React.ReactNode }) {
         </div>
       </div>
 
-      {/* Right side: 3D character (fixed on desktop) */}
       <div className="landing-3d-panel">
         {children}
       </div>
 
-      {/* Bottom label */}
       <div className="landing-bottom-label">
         <span className="landing-city">Dhaka, Bangladesh</span>
-        <span className="landing-available">
-          <span className="available-dot" />
+        <span className="landing-available" role="status" aria-label="Currently available for work">
+          <span className="available-dot" aria-hidden="true" />
           Available for work
         </span>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="landing-scroll-indicator">
+      <div className="landing-scroll-indicator" aria-hidden="true">
         <span className="scroll-text">Scroll</span>
         <div className="scroll-line">
           <div className="scroll-line-inner" />

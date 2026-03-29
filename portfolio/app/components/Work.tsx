@@ -7,7 +7,7 @@ const projects = [
   {
     id: "efamily",
     title: "E-Family Court",
-    category: "Government Platform — Bangladesh",
+    category: "Government Platform -- Bangladesh",
     tools: "Laravel, MSSQL, JWT, dompdf, SMS APIs, Payment Gateway",
     desc: "National e-Judiciary platform. Citizens file cases, track progress, make payments online. Judges manage hearings; lawyers submit documents. Deployed across Dhaka and Chattogram.",
     accent: "#3B82F6",
@@ -80,36 +80,51 @@ export default function Work() {
     if (isAnimating) return;
     setIsAnimating(true);
     setCurrent((((i % projects.length) + projects.length) % projects.length));
-    setTimeout(() => setIsAnimating(false), 500);
-  }, [isAnimating]);
+    const timer = setTimeout(() => setIsAnimating(false), 500);
+    return () => clearTimeout(timer);
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const p = projects[current];
+  if (!p) return null;
 
   return (
-    <section className="work-section section" id="work">
+    <section className="work-section section" id="work" aria-labelledby="work-heading">
       <div className="work-inner">
         <div className="work-header">
           <h3 className="title work-label">Featured Work</h3>
-          <h2 className="work-title">
+          <h2 className="work-title" id="work-heading">
             Built for real<br />
             <span>people.</span>
           </h2>
         </div>
 
-        <div className="work-carousel">
-          {/* Arrow nav */}
-          <button className="work-arrow work-arrow--prev" onClick={() => goTo(current - 1)} aria-label="Previous" data-cursor="disable">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+        <div className="work-carousel" role="region" aria-label="Featured projects carousel" aria-roledescription="carousel">
+          <button
+            className="work-arrow work-arrow--prev"
+            onClick={() => goTo(current - 1)}
+            aria-label="Previous project"
+            aria-controls="work-carousel-slide"
+            data-cursor="disable"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
           </button>
 
-          <button className="work-arrow work-arrow--next" onClick={() => goTo(current + 1)} aria-label="Next" data-cursor="disable">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          <button
+            className="work-arrow work-arrow--next"
+            onClick={() => goTo(current + 1)}
+            aria-label="Next project"
+            aria-controls="work-carousel-slide"
+            data-cursor="disable"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
           </button>
 
-          {/* Project slide */}
           <div
             className="work-slide"
-            key={current}
+            id="work-carousel-slide"
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`Project ${current + 1} of ${projects.length}: ${p.title}`}
             style={{ "--accent": p.accent } as React.CSSProperties}
           >
             <div className="slide-left">
@@ -127,23 +142,31 @@ export default function Work() {
               <h3 className="slide-title">{p.title}</h3>
               <p className="slide-desc">{p.desc}</p>
               <p className="slide-tools">{p.tools}</p>
-              <a href={p.url} target="_blank" rel="noopener noreferrer" className="slide-link" data-cursor="link">
+              <a
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="slide-link"
+                data-cursor="link"
+                aria-label={`View ${p.title} project`}
+              >
                 View Project
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 17L17 7M17 7H7M17 7v10" /></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M7 17L17 7M17 7H7M17 7v10" /></svg>
               </a>
             </div>
           </div>
 
-          {/* Dots */}
-          <div className="work-dots">
-            {projects.map((_, i) => (
+          <div className="work-dots" role="tablist" aria-label="Project navigation">
+            {projects.map((proj, i) => (
               <button
                 key={i}
                 className={`work-dot ${i === current ? "work-dot--active" : ""}`}
                 onClick={() => goTo(i)}
-                aria-label={`Go to project ${i + 1}`}
+                aria-label={`Go to project ${i + 1}: ${proj.title}`}
+                aria-current={i === current ? "true" : undefined}
+                role="tab"
                 data-cursor="disable"
-                style={i === current ? { background: projects[current].accent, borderColor: projects[current].accent } : {}}
+                style={i === current ? { background: proj.accent, borderColor: proj.accent } : {}}
               />
             ))}
           </div>

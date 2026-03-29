@@ -12,34 +12,23 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      const offset = 80;
-      const top = el.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top, behavior: "smooth" });
-    }
-  };
-
   return (
-    <>
-      <nav className={`navbar ${scrolled ? "navbar--scrolled" : ""}`}>
-        <div className="navbar-inner">
-          <a href="#" className="navbar-logo" data-cursor="link">
-            ZR<span>.</span>
-          </a>
+    <nav className={`navbar ${scrolled ? "navbar--scrolled" : ""}`} aria-label="Main navigation">
+      <div className="navbar-inner">
+        <a href="#landingDiv" className="navbar-logo" data-cursor="link" aria-label="Zohir Rayhan - Back to top">
+          ZR<span>.</span>
+        </a>
 
-          <div className="navbar-links">
-            <button onClick={() => scrollTo("about")} className="nav-link" data-cursor="link">About</button>
-            <button onClick={() => scrollTo("work")} className="nav-link" data-cursor="link">Work</button>
-            <button onClick={() => scrollTo("contact")} className="nav-link" data-cursor="link">Contact</button>
-          </div>
-
-          <a href="#contact" className="navbar-cta" data-cursor="link">
-            Hire Me
-          </a>
+        <div className="navbar-links">
+          <a href="#about" className="nav-link" data-cursor="link">About</a>
+          <a href="#work" className="nav-link" data-cursor="link">Work</a>
+          <a href="#contact" className="nav-link" data-cursor="link">Contact</a>
         </div>
-      </nav>
-    </>
+
+        <a href="#contact" className="navbar-cta" data-cursor="link">
+          Hire Me
+        </a>
+      </div>
+    </nav>
   );
 }

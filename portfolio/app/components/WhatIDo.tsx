@@ -10,7 +10,7 @@ const whatIDoCards = [
   {
     label: "02",
     title: "Government-Scale Platforms",
-    desc: "End-to-end digital systems for e-Judiciary — case filing, tracking, payments, and SMS/email workflows. Handling thousands of daily users across multiple cities.",
+    desc: "End-to-end digital systems for e-Judiciary -- case filing, tracking, payments, and SMS/email workflows. Handling thousands of daily users across multiple cities.",
     tags: ["Laravel", "MSSQL", "JWT", "SMS APIs", "Payment Gateway", "RBAC"],
   },
   {
@@ -23,31 +23,31 @@ const whatIDoCards = [
 
 export default function WhatIDo() {
   return (
-    <section className="whatido-section section" id="whatido">
+    <section className="whatido-section section" id="whatido" aria-labelledby="whatido-heading">
       <div className="whatido-inner">
         <div className="whatido-header">
           <h3 className="title whatido-label">What I Do</h3>
-          <h2 className="whatido-title">
+          <h2 className="whatido-title" id="whatido-heading">
             Building the future,<br />
             <span>one system at a time.</span>
           </h2>
         </div>
 
-        <div className="whatido-cards" data-stagger>
+        <div className="whatido-cards" data-stagger role="list">
           {whatIDoCards.map((card) => (
-            <div className="whatido-card" key={card.label}>
+            <article className="whatido-card" key={card.label} role="listitem" aria-labelledby={`whatido-card-${card.label}`}>
               <div className="card-header">
-                <span className="card-number">{card.label}</span>
-                <div className="card-accent-line" />
+                <span className="card-number" id={`whatido-card-${card.label}`}>{card.label}</span>
+                <div className="card-accent-line" aria-hidden="true" />
               </div>
               <h3 className="card-title">{card.title}</h3>
               <p className="card-desc">{card.desc}</p>
-              <div className="card-tags">
+              <div className="card-tags" role="list" aria-label="Technologies used">
                 {card.tags.map((tag) => (
-                  <span key={tag} className="card-tag">{tag}</span>
+                  <span key={tag} className="card-tag" role="listitem">{tag}</span>
                 ))}
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </div>

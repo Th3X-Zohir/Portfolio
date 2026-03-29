@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useMemo } from "react";
 import * as THREE from "three";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, MeshDistortMaterial } from "@react-three/drei";
 
 function Particles({ count = 350 }: { count?: number }) {
@@ -170,6 +170,7 @@ export default function Scene3D() {
       style={{ width: "100%", height: "100%" }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true }}
+      aria-hidden="true"
     >
       <SceneContent />
     </Canvas>
