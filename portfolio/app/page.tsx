@@ -7,6 +7,11 @@ import {
   ExternalLink, Brain, Zap, Shield, Database, Radio,
   ShoppingCart, Globe, Users, Building2, HeartPulse, Link2, Cpu, Sparkles
 } from "lucide-react";
+import dynamic from "next/dynamic";
+import ClientOnly from "./components/ClientOnly";
+import Cursor from "./components/Cursor";
+
+const Scene3D = dynamic(() => import("./components/Scene3D"), { ssr: false });
 
 // ============================================================
 // TEXT SCRAMBLE — matrix-style decode on load
@@ -486,7 +491,7 @@ function Hero() {
             </motion.div>
           </div>
 
-          {/* Right — visual panel */}
+          {/* Right — 3D visual panel */}
           <motion.div
             className="hero-visual"
             initial={{ opacity: 0, x: 40 }}
@@ -494,17 +499,10 @@ function Hero() {
             transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             style={{ y: heroImgYSpring }}
           >
-            <div className="hero-visual-inner">
-              <div className="hero-visual-bg" />
-              <div className="hero-visual-grid" />
-              <div className="hero-visual-content">
-                <div className="hero-visual-icon">
-                  <Brain size={40} color="var(--color-accent)" />
-                </div>
-                <div className="hero-visual-name">Zohir Rayhan</div>
-                <div className="hero-visual-role">AI-Native Full-Stack</div>
-              </div>
-              <div className="hero-visual-glow" />
+            <div className="hero-visual-inner hero-3d-inner">
+              <ClientOnly>
+                <Scene3D />
+              </ClientOnly>
 
               {/* Floating metric cards */}
               <div className="hero-metric-float hero-metric-float--1">
@@ -807,6 +805,7 @@ function Footer() {
 export default function Home() {
   return (
     <>
+      <Cursor />
       <ScrollProgress />
       <Navbar />
       <Hero />
