@@ -24,7 +24,7 @@ export default function Loading({ onComplete }: { onComplete?: () => void }) {
           }, 600);
           return 100;
         }
-        return p + (100 - p) * 0.04;
+        return p + (100 - p) * 0.04 > 99.9 ? 100 : p + (100 - p) * 0.04;
       });
     }, 40);
     return () => clearInterval(interval);
