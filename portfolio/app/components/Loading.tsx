@@ -14,19 +14,24 @@ export default function Loading({ onComplete }: { onComplete?: () => void }) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
+    let frame = 0;
+    const totalFrames = 60; // ~2.4s at 40ms intervals
+
     const interval = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setVisible(false);
-            onComplete?.();
-          }, 600);
-          return 100;
-        }
-        return p + (100 - p) * 0.04;
-      });
+      frame++;
+      // Linear ramp from 0 to 100 over totalFrames
+      const currentProgress = Math.min((frame / totalFrames) * 100, 100);
+      setProgress(currentProgress);
+
+      if (frame >= totalFrames) {
+        clearInterval(interval);
+        setTimeout(() => {
+          setVisible(false);
+          onComplete?.();
+        }, 600);
+      }
     }, 40);
+
     return () => clearInterval(interval);
   }, [onComplete]);
 
