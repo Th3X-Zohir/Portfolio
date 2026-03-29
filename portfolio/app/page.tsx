@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import Loading from "./components/Loading";
 import Cursor from "./components/Cursor";
+import ScrollProgress from "./components/ScrollProgress";
 import Navbar from "./components/Navbar";
 import SocialIcons from "./components/SocialIcons";
 import Landing from "./components/Landing";
@@ -37,6 +38,7 @@ export default function Home() {
     <>
       {!loaded && <Loading onComplete={handleLoadComplete} />}
       <Cursor />
+      <ScrollProgress />
       <Navbar />
       <SocialIcons />
       <main className="main-body">

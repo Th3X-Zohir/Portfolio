@@ -42,15 +42,16 @@ export default function Landing({ children }: { children?: React.ReactNode }) {
       // Scroll away landing text
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: "#smooth-wrapper",
+          trigger: ".landing-section",
           start: "top top",
-          end: "20% top",
+          end: "bottom top",
           scrub: 1.5,
         },
       });
 
-      tl.to(".landing-text-block", { y: -80, opacity: 0, filter: "blur(4px)", duration: 0.4 }, 0)
-        .to(".landing-circle-glow", { scale: 0.3, opacity: 0, duration: 0.3 }, 0);
+      tl.to(".landing-text-block", { y: -60, opacity: 0, duration: 0.5 }, 0)
+        .to(".landing-circle-glow", { scale: 0.5, opacity: 0, duration: 0.3 }, 0)
+        .to(".landing-3d-panel", { y: 80, opacity: 0.3, duration: 0.5 }, 0);
     });
 
     return () => ctx.revert();
@@ -102,6 +103,14 @@ export default function Landing({ children }: { children?: React.ReactNode }) {
           <span className="available-dot" />
           Available for work
         </span>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="landing-scroll-indicator">
+        <span className="scroll-text">Scroll</span>
+        <div className="scroll-line">
+          <div className="scroll-line-inner" />
+        </div>
       </div>
     </section>
   );
