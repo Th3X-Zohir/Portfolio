@@ -159,7 +159,6 @@
 }
 
 .slide-desc {
-  font-size: 0.9375rem;
   font-size: 0.88rem;
   color: #8888A0;
   line-height: 1.75;
@@ -167,7 +166,6 @@
 }
 
 .slide-tools {
-  font-size: 0.7rem;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.62rem;
   color: #555566;
@@ -251,5 +249,7 @@
   .work-arrow {
     width: 42px;
     height: 42px;
+    left: 8px !important;
+    right: 8px !important;
   }
 }

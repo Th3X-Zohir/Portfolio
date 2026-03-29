@@ -83,11 +83,9 @@
 }
 
 .stat-label {
-  font-size: 0.7rem;
-  color: #A0A0B0;
-  font-family: 'JetBrains Mono', monospace;
   font-size: 0.62rem;
   color: #8888A0;
+  font-family: 'JetBrains Mono', monospace;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
