@@ -31,8 +31,8 @@
   --color-border: rgba(255, 255, 255, 0.06);
   --color-border-2: rgba(255, 255, 255, 0.1);
   --color-text: #fafafa;
-  --color-text-secondary: #a1a1aa;
-  --color-text-muted: #71717A;
+  --color-text-secondary: #C8C8D0;
+  --color-text-muted: #8888A0;
   --color-accent: #F97316;
   --color-accent-dim: rgba(249, 115, 22, 0.2);
   --color-accent-glow: rgba(249, 115, 22, 0.15);
@@ -62,7 +62,9 @@ body {
   font-family: var(--font-body);
   background: var(--color-bg);
   color: var(--color-text);
-  line-height: 1.6;
+  line-height: 1.75;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;

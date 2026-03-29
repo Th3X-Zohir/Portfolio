@@ -103,10 +103,10 @@
 
 .landing-tagline {
   font-family: 'Outfit', sans-serif;
-  font-size: clamp(1rem, 2vw, 1.4rem);
-  font-weight: 500;
-  color: #a1a1aa;
-  line-height: 1.5;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 400;
+  color: #D0D0D8;
+  line-height: 1.6;
   margin-bottom: 40px;
   opacity: 0;
 }
@@ -217,7 +217,7 @@
 .scroll-text {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
-  color: #3F3F46;
+  color: #555566;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   writing-mode: vertical-rl;
@@ -257,7 +257,7 @@
 .landing-city {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
-  color: #71717A;
+  color: #8888A0;
   text-transform: uppercase;
   letter-spacing: 0.15em;
 }

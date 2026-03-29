@@ -18,7 +18,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #3F3F46;
+  color: #555566;
   border-radius: 8px;
   transition: color 0.2s, transform 0.2s;
   text-decoration: none;

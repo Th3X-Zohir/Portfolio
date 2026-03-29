@@ -41,8 +41,8 @@
 }
 
 .contact-sub {
-  font-size: 0.95rem;
-  color: #71717A;
+  font-size: 1rem;
+  color: #8888A0;
   line-height: 1.8;
   max-width: 440px;
   margin: 0 auto;
@@ -65,7 +65,7 @@
 .contact-card-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.62rem;
-  color: #71717A;
+  color: #8888A0;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   margin-bottom: 16px;
@@ -121,7 +121,7 @@
   gap: 12px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #a1a1aa;
+  color: #C8C8D0;
   text-decoration: none;
   padding: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -150,7 +150,7 @@
 
 .footer-inner p {
   font-size: 0.82rem;
-  color: #71717A;
+  color: #8888A0;
 }
 
 .footer-inner a {
@@ -170,7 +170,7 @@
 
 .footer-links a {
   font-size: 0.78rem;
-  color: #71717A;
+  color: #8888A0;
   text-decoration: none;
   transition: color 0.2s;
 }

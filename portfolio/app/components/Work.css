@@ -1,5 +1,5 @@
 .work-section {
-  background: #0a0e17;
+  background: #0d1018;
   padding: 140px 0;
   position: relative;
   z-index: 1;
@@ -76,7 +76,7 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 50%;
-  color: #a1a1aa;
+  color: #C8C8D0;
   transition: all 0.25s;
   z-index: 5;
 }
@@ -130,7 +130,7 @@
 .slide-category {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
-  color: #71717A;
+  color: #8888A0;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -159,16 +159,18 @@
 }
 
 .slide-desc {
+  font-size: 0.9375rem;
   font-size: 0.88rem;
-  color: #71717A;
+  color: #8888A0;
   line-height: 1.75;
   max-width: 520px;
 }
 
 .slide-tools {
+  font-size: 0.7rem;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.62rem;
-  color: #3F3F46;
+  color: #555566;
   letter-spacing: 0.02em;
 }
 
@@ -182,7 +184,7 @@
   border-radius: 9999px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #a1a1aa;
+  color: #C8C8D0;
   text-decoration: none;
   width: fit-content;
   margin-top: 8px;
